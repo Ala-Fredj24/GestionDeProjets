@@ -1,0 +1,12 @@
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+.app-navbar {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.app-content {
+  min-height: calc(100vh - 56px);
+}

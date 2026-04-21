@@ -1,0 +1,118 @@
+# Backend (Eclipse/Spring Boot)
+**/backend/
+**/.classpath
+**/.project
+**/.settings/
+**/bin/
+**/target/
+**/.gradle/
+
+# Eclipse spécifique
+.idea/
+*.iml
+
+# Compiled output
+/dist
+/tmp
+/out-tsc
+/bazel-out
+
+# Node
+/node_modules
+npm-debug.log
+yarn-error.log
+
+# IDEs and editors
+.idea/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# Visual Studio Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/mcp.json
+.history/*
+
+# Miscellaneous
+/.angular/cache
+.sass-cache/
+/connect.lock
+/coverage
+/libpeerconnection.log
+testem.log
+/typings
+__screenshots__/
+
+# System files
+.DS_Store
+Thumbs.db
+############################
+# GENERAL
+############################
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.swp
+*.swo
+ 
+############################
+# ENV FILES (SECRETS)
+############################
+.env
+*.env
+.env.*
+!.env.example
+############################
+# JAVA / SPRING BOOT
+############################
+backend/target/
+backend/*.log
+backend/.classpath
+backend/.project
+backend/.settings/
+backend/.factorypath
+ 
+############################
+# MAVEN
+############################
+.mvn/wrapper/maven-wrapper.jar
+ 
+############################
+# ANGULAR / NODE
+############################
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/.cache/
+ 
+############################
+# IDEs
+############################
+# Eclipse
+*.project
+*.classpath
+.settings/
+ 
+# VS Code
+.vscode
+ 
+ 
+############################
+# OS / TEMP FILES
+############################
+*.pid
+*.seed
+*.out
+ 
+############################
+# TEST / COVERAGE
+############################
+coverage/
