@@ -1,8 +1,8 @@
 package com.projetjee.backend.enums;
 
 public enum TaskStatus {
-    TODO,
-    IN_PROGRESS,
-    DONE,
-    CANCELLED
+    À_Faire,
+    En_Cours,
+    Complété,
+    Annulé
 }

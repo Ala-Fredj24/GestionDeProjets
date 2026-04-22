@@ -18,11 +18,11 @@ public class ProjectService {
         this.projectRepository = projectRepository;
     }
 
-    public List<Project> getAllProjects() {
+    public List<Project> recupererTousLesProjets() {
         return projectRepository.findAll();
     }
 
-    public Project getProjectById(Long id) {
+    public Project recupererProjetParId(Long id) {
         return projectRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
@@ -30,34 +30,34 @@ public class ProjectService {
                 ));
     }
 
-    public Project createProject(Project project) {
-        validateProjectDates(project);
+    public Project creerProjet(Project project) {
+        validerDatesProjet(project);
         return projectRepository.save(project);
     }
 
-    public Project updateProject(Long id, Project projectDetails) {
-        Project existingProject = getProjectById(id);
+    public Project mettreAJourProjet(Long id, Project projectDetails) {
+        Project existingProject = recupererProjetParId(id);
 
-        validateProjectDates(projectDetails);
+        validerDatesProjet(projectDetails);
 
-        existingProject.setName(projectDetails.getName());
-        existingProject.setStartDate(projectDetails.getStartDate());
-        existingProject.setEndDate(projectDetails.getEndDate());
+        existingProject.setNom(projectDetails.getNom());
+        existingProject.setDateDebut(projectDetails.getDateDebut());
+        existingProject.setDateFin(projectDetails.getDateFin());
         existingProject.setBudget(projectDetails.getBudget());
-        existingProject.setStatus(projectDetails.getStatus());
+        existingProject.setStatut(projectDetails.getStatut());
 
         return projectRepository.save(existingProject);
     }
 
-    public void deleteProject(Long id) {
-        Project existingProject = getProjectById(id);
+    public void supprimerProjet(Long id) {
+        Project existingProject = recupererProjetParId(id);
         projectRepository.delete(existingProject);
     }
 
-    private void validateProjectDates(Project project) {
-        if (project.getStartDate() != null
-                && project.getEndDate() != null
-                && !project.getStartDate().isBefore(project.getEndDate())) {
+    private void validerDatesProjet(Project project) {
+        if (project.getDateDebut() != null
+                && project.getDateFin() != null
+                && !project.getDateDebut().isBefore(project.getDateFin())) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "La date de début doit être antérieure à la date de fin."

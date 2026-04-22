@@ -34,7 +34,6 @@ public class Employee {
 	private String equipe;
 	 
 	public Employee() {
-		// TODO Auto-generated constructor stub
 	}
 	public Employee(String nom, String email, String role, String equipe) {
 		this.nom = nom;

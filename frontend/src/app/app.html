@@ -1,36 +1,42 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark app-navbar">
-  <div class="container">
-    <a class="navbar-brand fw-bold" routerLink="/">Gestion de Projet</a>
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-logo">GP</div>
+      <div>
+        <h1>GestionProjet</h1>
+        <p>Project Workspace</p>
+      </div>
+    </div>
 
-    <div class="navbar-nav">
-      <a
-        class="nav-link"
-        routerLink="/"
-        [routerLinkActiveOptions]="{ exact: true }"
-        routerLinkActive="active"
-      >
-        Dashboard
+    <nav class="menu">
+      <a routerLink="/" [routerLinkActiveOptions]="{ exact: true }" routerLinkActive="active">
+        Tableau de bord
       </a>
-
-      <a
-        class="nav-link"
-        routerLink="/projects"
-        routerLinkActive="active"
-      >
+      <a routerLink="/projets" routerLinkActive="active">
         Projets
       </a>
-
-      <a
-        class="nav-link"
-        routerLink="/tasks"
-        routerLinkActive="active"
-      >
+      <a routerLink="/taches" routerLinkActive="active">
         Tâches
       </a>
-    </div>
-  </div>
-</nav>
+      <a routerLink="/projets/nouveau" routerLinkActive="active">
+        Nouveau projet
+      </a>
+      <a routerLink="/taches/nouveau" routerLinkActive="active">
+        Nouvelle tâche
+      </a>
+    </nav>
+  </aside>
 
-<div class="app-content">
-  <router-outlet></router-outlet>
+  <div class="main-area">
+    <header class="topbar">
+      <div>
+        <h2>Plateforme de gestion de projet</h2>
+        <p>Suivi des projets, tâches, budget et ressources</p>
+      </div>
+    </header>
+
+    <main class="content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
 </div>

@@ -3,9 +3,16 @@ package com.projetjee.backend.entity;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+import com.projetjee.backend.converter.ProjectStatusConverter;
 import com.projetjee.backend.enums.ProjectStatus;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -23,11 +30,11 @@ public class Project {
     private String nom;
 
     @NotNull(message = "La date de début est obligatoire")
-    @Column(name= "date_debut", nullable = false)
+    @Column(name = "date_debut", nullable = false)
     private LocalDate dateDebut;
 
     @NotNull(message = "La date de fin est obligatoire")
-    @Column(name= "date_fin",nullable = false)
+    @Column(name = "date_fin", nullable = false)
     private LocalDate dateFin;
 
     @NotNull(message = "Le budget est obligatoire")
@@ -36,7 +43,7 @@ public class Project {
     private BigDecimal budget;
 
     @NotNull(message = "Le statut est obligatoire")
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = ProjectStatusConverter.class)
     @Column(nullable = false)
     private ProjectStatus statut;
 
@@ -60,27 +67,27 @@ public class Project {
         this.id = id;
     }
 
-    public String getName() {
+    public String getNom() {
         return nom;
     }
 
-    public void setName(String nom) {
+    public void setNom(String nom) {
         this.nom = nom;
     }
 
-    public LocalDate getStartDate() {
+    public LocalDate getDateDebut() {
         return dateDebut;
     }
 
-    public void setStartDate(LocalDate dateDebut) {
+    public void setDateDebut(LocalDate dateDebut) {
         this.dateDebut = dateDebut;
     }
 
-    public LocalDate getEndDate() {
+    public LocalDate getDateFin() {
         return dateFin;
     }
 
-    public void setEndDate(LocalDate dateFin) {
+    public void setDateFin(LocalDate dateFin) {
         this.dateFin = dateFin;
     }
 
@@ -92,11 +99,11 @@ public class Project {
         this.budget = budget;
     }
 
-    public ProjectStatus getStatus() {
+    public ProjectStatus getStatut() {
         return statut;
     }
 
-    public void setStatus(ProjectStatus statut) {
+    public void setStatut(ProjectStatus statut) {
         this.statut = statut;
     }
 }

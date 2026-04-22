@@ -29,7 +29,6 @@ public class EmployeeService {
 	}
 
 	private void validateUniqueEmail(String email) {
-		// TODO Auto-generated method stub
 		if (employeeRepository.findByEmail(email).isPresent()) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email déjà utilisé : " + email);
 		}

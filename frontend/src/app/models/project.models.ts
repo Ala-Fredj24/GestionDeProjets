@@ -1,9 +1,15 @@
 export interface Project {
-    id?: number;
-    nom: string;
-    description: string;
-    dateDebut: Date;
-    dateFin: Date;
-    statut: string;
-    budget: number;
+  id?: number;
+  nom: string;
+  dateDebut: string;
+  dateFin: string;
+  budget: number;
+  statut: string;
+}
+export interface ProjectPayload {
+  nom: string;
+  dateDebut: string;
+  dateFin: string;
+  budget: number;
+  statut: string;
 }
