@@ -1,37 +1,104 @@
-<div class="app-layout">
+<div class="app-shell">
   <aside class="sidebar">
-    <div class="brand">
-      <div class="brand-logo">GP</div>
-      <div>
-        <h1>GestionProjet</h1>
-        <p>Project Workspace</p>
+    <div class="sidebar-top">
+      <div class="brand">
+        <div class="brand-logo">GP</div>
+        <div class="brand-text">
+          <h1>GestionProjet</h1>
+          <p>Workspace professionnel</p>
+        </div>
       </div>
     </div>
 
-    <nav class="menu">
-      <a routerLink="/" [routerLinkActiveOptions]="{ exact: true }" routerLinkActive="active">
-        Tableau de bord
+    <div class="sidebar-section">
+      <p class="section-label">Navigation</p>
+
+      <a routerLink="/" [routerLinkActiveOptions]="{ exact: true }" routerLinkActive="active-link" class="nav-link">
+        <span class="nav-icon">📊</span>
+        <span class="nav-text">Tableau de bord</span>
       </a>
-      <a routerLink="/projets" routerLinkActive="active">
-        Projets
+    </div>
+
+    <div class="sidebar-section">
+      <p class="section-label">Gestion</p>
+
+      <div class="nav-group">
+        <button type="button" class="nav-toggle" (click)="toggleProjets()" [class.open]="projetsOpen">
+          <div class="nav-left">
+            <span class="nav-icon">📁</span>
+            <span class="nav-text">Projets</span>
+          </div>
+          <span class="chevron">⌄</span>
+        </button>
+
+        <div class="submenu" *ngIf="projetsOpen">
+          <a routerLink="/projets" routerLinkActive="active-sublink" class="sub-link">
+            <span class="sub-dot"></span>
+            Liste des projets
+          </a>
+          <a routerLink="/projets/nouveau" routerLinkActive="active-sublink" class="sub-link">
+            <span class="sub-dot"></span>
+            Nouveau projet
+          </a>
+        </div>
+      </div>
+
+      <div class="nav-group">
+        <button type="button" class="nav-toggle" (click)="toggleTaches()" [class.open]="tachesOpen">
+          <div class="nav-left">
+            <span class="nav-icon">✅</span>
+            <span class="nav-text">Tâches</span>
+          </div>
+          <span class="chevron">⌄</span>
+        </button>
+
+        <div class="submenu" *ngIf="tachesOpen">
+          <a routerLink="/taches" routerLinkActive="active-sublink" class="sub-link">
+            <span class="sub-dot"></span>
+            Liste des tâches
+          </a>
+          <a routerLink="/taches/nouveau" routerLinkActive="active-sublink" class="sub-link">
+            <span class="sub-dot"></span>
+            Nouvelle tâche
+          </a>
+        </div>
+      </div>
+
+      <a routerLink="/rapports-financiers" routerLinkActive="active-link" class="nav-link">
+        <span class="nav-icon">💰</span>
+        <span class="nav-text">Rapports financiers</span>
       </a>
-      <a routerLink="/taches" routerLinkActive="active">
-        Tâches
+      <a routerLink="/employes" routerLinkActive="active-link" class="nav-link">
+        <span class="nav-icon">👥</span>
+        <span class="nav-text">Employés</span>
       </a>
-      <a routerLink="/projets/nouveau" routerLinkActive="active">
-        Nouveau projet
-      </a>
-      <a routerLink="/taches/nouveau" routerLinkActive="active">
-        Nouvelle tâche
-      </a>
-    </nav>
+
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="workspace-card">
+        <p class="workspace-title">Espace de travail</p>
+        <p class="workspace-text">Suivi des projets, budget et ressources en temps réel.</p>
+      </div>
+    </div>
   </aside>
 
-  <div class="main-area">
+  <div class="main-panel">
     <header class="topbar">
       <div>
         <h2>Plateforme de gestion de projet</h2>
-        <p>Suivi des projets, tâches, budget et ressources</p>
+        <p>Suivi intelligent des projets et des tâches</p>
+      </div>
+
+      <div class="topbar-actions">
+        <div class="status-chip">En ligne</div>
+        <div class="user-box">
+          <div class="user-avatar">A</div>
+          <div>
+            <strong>Admin</strong>
+            <p>Responsable projet</p>
+          </div>
+        </div>
       </div>
     </header>
 

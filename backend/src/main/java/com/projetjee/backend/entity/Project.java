@@ -2,6 +2,8 @@ package com.projetjee.backend.entity;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.projetjee.backend.converter.ProjectStatusConverter;
 import com.projetjee.backend.enums.ProjectStatus;
@@ -12,6 +14,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
@@ -46,11 +52,19 @@ public class Project {
     @Convert(converter = ProjectStatusConverter.class)
     @Column(nullable = false)
     private ProjectStatus statut;
+    @ManyToMany
+    @JoinTable(name = "projets_employes", joinColumns = @JoinColumn(name = "projet_id"), inverseJoinColumns = @JoinColumn(name = "employe_id"))
+    private List<Employee> employes = new ArrayList<>();
+
+    @ManyToOne
+    @JoinColumn(name = "chef_projet_id")
+    private Employee chefProjet;
 
     public Project() {
     }
 
-    public Project(Long id, String nom, LocalDate dateDebut, LocalDate dateFin, BigDecimal budget, ProjectStatus statut) {
+    public Project(Long id, String nom, LocalDate dateDebut, LocalDate dateFin, BigDecimal budget,
+            ProjectStatus statut) {
         this.id = id;
         this.nom = nom;
         this.dateDebut = dateDebut;
@@ -105,5 +119,21 @@ public class Project {
 
     public void setStatut(ProjectStatus statut) {
         this.statut = statut;
+    }
+
+    public List<Employee> getEmployes() {
+        return employes;
+    }
+
+    public void setEmployes(List<Employee> employes) {
+        this.employes = employes;
+    }
+    
+    public Employee getChefProjet() {
+        return chefProjet;
+    }
+
+    public void setChefProjet(Employee chefProjet) {
+        this.chefProjet = chefProjet;
     }
 }

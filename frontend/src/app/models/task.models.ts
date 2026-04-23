@@ -1,3 +1,4 @@
+import { Employee } from './employee.models';
 import { Project } from './project.models';
 
 export interface Task {
@@ -8,6 +9,9 @@ export interface Task {
   statut: string;
   priorite: string;
   dateLimite: string;
+  coutReel: number;
+  coutPrevu: number;
+  employeAssigne?: Employee|null;
 }
 export interface TaskPayload {
   projet: {
@@ -18,4 +22,7 @@ export interface TaskPayload {
   statut: string;
   priorite: string;
   dateLimite: string;
+  coutReel: number;
+  coutPrevu: number;
+  employeAssigne?:{ id: number }|null;
 }

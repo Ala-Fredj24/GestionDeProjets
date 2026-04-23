@@ -180,16 +180,23 @@ export class DashboardComponent implements OnInit {
   readonly taskService = inject(TaskService);
 
   readonly messageErreur = signal('');
-ngOnInit(): void {
-  this.projectService.chargerTousLesProjets().subscribe({
-    next: (data) => {
-      console.log('Projets chargés avec succès :', data);
-    },
-    error: (error) => {
-      console.error('Erreur lors du chargement des projets :', error);
-      this.messageErreur.set(
-        `Impossible de charger les projets. Code HTTP: ${error.status}`
-      );
-    }
-  });
-}}
+  ngOnInit(): void {
+    this.projectService.chargerTousLesProjets().subscribe({
+      error: (error) => {
+        console.error('Erreur lors du chargement des projets :', error);
+        this.messageErreur.set(
+          `Impossible de charger les projets. Code HTTP: ${error.status}`
+        );
+      }
+    });
+
+    this.taskService.chargerToutesLesTaches().subscribe({
+      error: (error) => {
+        console.error('Erreur lors du chargement des tâches :', error);
+        this.messageErreur.set(
+          `Impossible de charger les tâches. Code HTTP: ${error.status}`
+        );
+      }
+    });
+  }
+}

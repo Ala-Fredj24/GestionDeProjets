@@ -1,31 +1,52 @@
 package com.projetjee.backend.controller;
 
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import com.projetjee.backend.service.EmployeeService;
 import java.util.List;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
 import com.projetjee.backend.entity.Employee;
+import com.projetjee.backend.service.EmployeeService;
+
+import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/employees")
+@RequestMapping("/api/employes")
 @CrossOrigin(origins = "http://localhost:4200")
-
 public class EmployeeController {
-	private final EmployeeService employeeService;
-	public EmployeeController(EmployeeService employeeService) {
-		this.employeeService = employeeService;
-	}
-	
-	@GetMapping
-	public List<Employee> getAllEmployees() {
-		return employeeService.getAllEmployees();
-	}
-	@GetMapping("/{id}")
-	public Employee getEmployeeById(@PathVariable Long id) {
-		return employeeService.getEmployeeById(id);
-	}
 
+    private final EmployeeService employeeService;
+
+    public EmployeeController(EmployeeService employeeService) {
+        this.employeeService = employeeService;
+    }
+
+    @GetMapping
+    public List<Employee> recupererTousLesEmployes() {
+        return employeeService.recupererTousLesEmployes();
+    }
+
+    @GetMapping("/{id}")
+    public Employee recupererEmployeParId(@PathVariable Long id) {
+        return employeeService.recupererEmployeParId(id);
+    }
+
+    @PostMapping
+    public ResponseEntity<Employee> creerEmploye(@Valid @RequestBody Employee employee) {
+        Employee createdEmployee = employeeService.creerEmploye(employee);
+        return new ResponseEntity<>(createdEmployee, HttpStatus.CREATED);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Employee> mettreAJourEmploye(@PathVariable Long id, @Valid @RequestBody Employee employee) {
+        Employee updatedEmployee = employeeService.mettreAJourEmploye(id, employee);
+        return ResponseEntity.ok(updatedEmployee);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> supprimerEmploye(@PathVariable Long id) {
+        employeeService.supprimerEmploye(id);
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -49,4 +49,10 @@ public class ProjectController {
         projectService.supprimerProjet(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PutMapping("/{id}/employes")
+    public ResponseEntity<Project> affecterEmployesAuProjet(@PathVariable Long id, @RequestBody List<Long> employeIds) {
+        Project updatedProject = projectService.affecterEmployesAuProjet(id, employeIds);
+        return ResponseEntity.ok(updatedProject);
+    }
 }

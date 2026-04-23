@@ -1,25 +1,30 @@
 package com.projetjee.backend.service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.projetjee.backend.entity.Employee;
 import com.projetjee.backend.entity.Project;
 import com.projetjee.backend.entity.Task;
 import com.projetjee.backend.repository.ProjectRepository;
 import com.projetjee.backend.repository.TaskRepository;
+import com.projetjee.backend.repository.EmployeeRepository;
 
 @Service
 public class TaskService {
 
     private final ProjectRepository projectRepository;
     private final TaskRepository taskRepository;
+    private final EmployeeRepository employeeRepository;
 
-    public TaskService(ProjectRepository projectRepository, TaskRepository taskRepository) {
+    public TaskService(ProjectRepository projectRepository, TaskRepository taskRepository, EmployeeRepository employeeRepository) {
         this.projectRepository = projectRepository;
         this.taskRepository = taskRepository;
+        this.employeeRepository = employeeRepository;
     }
 
     public List<Task> recupererToutesLesTaches() {
@@ -48,6 +53,13 @@ public class TaskService {
                 ));
 
         task.setProjet(existingProject);
+        if (task.getCoutReel() == null) {
+            task.setCoutReel(BigDecimal.ZERO);
+        }
+        if(task.getCoutPrevu() == null) {
+            task.setCoutPrevu(BigDecimal.ZERO);
+        }
+        task.setEmployeAssigne(resoudreEmployeAssigne(task));
         return taskRepository.save(task);
     }
 
@@ -68,6 +80,9 @@ public class TaskService {
         existingTask.setStatut(taskDetails.getStatut());
         existingTask.setDateLimite(taskDetails.getDateLimite());
         existingTask.setPriorite(taskDetails.getPriorite());
+        existingTask.setCoutReel(taskDetails.getCoutReel());
+        existingTask.setCoutPrevu(taskDetails.getCoutPrevu());
+        existingTask.setEmployeAssigne(resoudreEmployeAssigne(taskDetails));
 
         return taskRepository.save(existingTask);
     }
@@ -75,5 +90,18 @@ public class TaskService {
     public void supprimerTache(Long id) {
         Task existingTask = recupererTacheParId(id);
         taskRepository.delete(existingTask);
+    }
+     private Employee resoudreEmployeAssigne(Task task) {
+        if (task.getEmployeAssigne() == null || task.getEmployeAssigne().getId() == null) {
+            return null;
+        }
+
+        Long employeId = task.getEmployeAssigne().getId();
+
+        return employeeRepository.findById(employeId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Employé assigné introuvable avec l'id : " + employeId
+                ));
     }
 }

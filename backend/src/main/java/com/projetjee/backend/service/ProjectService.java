@@ -1,21 +1,26 @@
 package com.projetjee.backend.service;
 
+import java.util.HashSet;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.projetjee.backend.entity.Employee;
 import com.projetjee.backend.entity.Project;
 import com.projetjee.backend.repository.ProjectRepository;
+import com.projetjee.backend.repository.EmployeeRepository;
 
 @Service
 public class ProjectService {
 
     private final ProjectRepository projectRepository;
+    private final EmployeeRepository employeeRepository;
 
-    public ProjectService(ProjectRepository projectRepository) {
+    public ProjectService(ProjectRepository projectRepository, EmployeeRepository employeeRepository) {
         this.projectRepository = projectRepository;
+        this.employeeRepository = employeeRepository;
     }
 
     public List<Project> recupererTousLesProjets() {
@@ -53,7 +58,7 @@ public class ProjectService {
         Project existingProject = recupererProjetParId(id);
         projectRepository.delete(existingProject);
     }
-
+  
     private void validerDatesProjet(Project project) {
         if (project.getDateDebut() != null
                 && project.getDateFin() != null
@@ -63,5 +68,25 @@ public class ProjectService {
                     "La date de début doit être antérieure à la date de fin."
             );
         }
+    }
+    public Project affecterEmployesAuProjet(Long projetId, List<Long> employeIds) {
+        Project projet = recupererProjetParId(projetId);
+
+        if (employeIds == null || employeIds.isEmpty()) {
+            projet.setEmployes(List.of());
+            return projectRepository.save(projet);
+        }
+
+        List<Employee> employes = employeeRepository.findAllById(employeIds);
+
+        if (employes.size() != new HashSet<>(employeIds).size()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Un ou plusieurs employés sont introuvables."
+            );
+        }
+
+        projet.setEmployes(employes);
+        return projectRepository.save(projet);
     }
 }

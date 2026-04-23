@@ -1,5 +1,6 @@
 package com.projetjee.backend.entity;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import com.projetjee.backend.converter.TaskPriorityConverter;
@@ -16,6 +17,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -56,16 +58,33 @@ public class Task {
     @Column(name = "date_limite", nullable = false)
     private LocalDate dateLimite;
 
+    @NotNull(message = "Le cout réel est obligatoire")
+    @DecimalMin(value = "0.0", inclusive = true, message = "Le cout doit être positif")
+    @Column(name = "cout_reel", precision = 12, scale = 2)
+    private BigDecimal coutReel = BigDecimal.ZERO;
+
+    @NotNull(message = "Le coût prévisionnel est obligatoire")
+    @DecimalMin(value = "0.0", inclusive = true, message = "Le coût prévisionnel doit être positif")
+    @Column(name = "cout_prevu", precision = 12, scale = 2, nullable = false)
+    private BigDecimal coutPrevu = BigDecimal.ZERO;
+    
+    @ManyToOne
+    @JoinColumn(name = "employe_assigne_id")
+    private Employee employeAssigne;
+
     public Task() {
     }
 
-    public Task(Project projet, String responsable, String description, TaskStatus statut, LocalDate dateLimite, TaskPriority priorite) {
+    public Task(Project projet, String responsable, String description, TaskStatus statut, LocalDate dateLimite,
+            TaskPriority priorite, BigDecimal coutReel, BigDecimal coutPrevu) {
         this.projet = projet;
         this.responsable = responsable;
         this.description = description;
         this.statut = statut;
         this.dateLimite = dateLimite;
         this.priorite = priorite;
+        this.coutReel = coutReel;
+        this.coutPrevu = coutPrevu;
     }
 
     public Long getId() {
@@ -122,5 +141,29 @@ public class Task {
 
     public void setDateLimite(LocalDate dateLimite) {
         this.dateLimite = dateLimite;
+    }
+
+    public BigDecimal getCoutReel() {
+        return coutReel;
+    }
+
+    public void setCoutReel(BigDecimal coutReel) {
+        this.coutReel = coutReel;
+    }
+
+    public BigDecimal getCoutPrevu() {
+        return coutPrevu;
+    }
+
+    public void setCoutPrevu(BigDecimal coutPrevu) {
+        this.coutPrevu = coutPrevu;
+    }
+
+    public Employee getEmployeAssigne() {
+        return employeAssigne;
+    }
+
+    public void setEmployeAssigne(Employee employeAssigne) {
+        this.employeAssigne = employeAssigne;
     }
 }

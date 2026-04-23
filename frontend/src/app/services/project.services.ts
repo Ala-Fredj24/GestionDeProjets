@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { Project, ProjectPayload } from '../models/project.models';
 import { environment } from '../../environments/environment';
+import { RapportFinancierProjet } from '../models/rapport-financier.models';
 
 @Injectable({
   providedIn: 'root'
@@ -10,6 +11,7 @@ import { environment } from '../../environments/environment';
 export class ProjectService {
   private http = inject(HttpClient);
   private apiUrl = `${environment.apiBaseUrl}/projets`;
+  private rapportApiUrl = `${environment.apiBaseUrl}/rapports-financiers/projets`;
   readonly projets = signal<Project[]>([]);
   readonly totalProjets = computed(() => this.projets().length);
   readonly budgetTotal = computed(() =>
@@ -41,4 +43,14 @@ export class ProjectService {
   supprimerProjet(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
+  chargerTousLesRapportsFinanciers(): Observable<RapportFinancierProjet[]> {
+    return this.http.get<RapportFinancierProjet[]>(this.rapportApiUrl);
+  }
+
+  chargerRapportFinancierParProjet(projetId: number): Observable<RapportFinancierProjet> {
+    return this.http.get<RapportFinancierProjet>(`${this.rapportApiUrl}/${projetId}`);
+  }
+  affecterEmployesAuProjet(projetId: number, employeIds: number[]): Observable<Project> {
+    return this.http.put<Project>(`${this.apiUrl}/${projetId}/employes`, employeIds);
+  } 
 }
