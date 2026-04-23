@@ -7,9 +7,12 @@ import org.springframework.web.bind.annotation.*;
 import com.projetjee.backend.entity.Project;
 import com.projetjee.backend.repository.ProjectRepository;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+
 @RestController
 @RequestMapping("/api/chef")
 @CrossOrigin(origins = "http://localhost:4200")
+@SecurityRequirement(name = "bearerAuth")
 public class ChefProjetController {
 
     private final CurrentUserService currentUserService;

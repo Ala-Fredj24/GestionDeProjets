@@ -9,11 +9,13 @@ import org.springframework.web.bind.annotation.*;
 import com.projetjee.backend.entity.Project;
 import com.projetjee.backend.service.ProjectService;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/projets")
 @CrossOrigin(origins = "http://localhost:4200")
+@SecurityRequirement(name = "bearerAuth")
 public class ProjectController {
 
     private final ProjectService projectService;

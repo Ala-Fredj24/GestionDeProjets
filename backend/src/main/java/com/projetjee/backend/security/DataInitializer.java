@@ -4,14 +4,21 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import com.projetjee.backend.entity.Employee;
+import java.util.Optional;
+import com.projetjee.backend.repository.EmployeeRepository;
+
 @Component
 public class DataInitializer implements CommandLineRunner {
 
     private final UserRepository userRepository;
+    private final EmployeeRepository employeeRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public DataInitializer(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public DataInitializer(UserRepository userRepository, EmployeeRepository employeeRepository,
+            PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.employeeRepository = employeeRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -25,6 +32,18 @@ public class DataInitializer implements CommandLineRunner {
             admin.setEmploye(null);
 
             userRepository.save(admin);
+        }
+        if (!userRepository.existsByEmail("chef1@projet.com")) {
+            Optional<Employee> employeOpt = employeeRepository.findByEmail("alafredj0@gmail.com");
+
+            if (employeOpt.isPresent()) {
+                User chef = new User();
+                chef.setEmail("chef1@projet.com");
+                chef.setMotDePasse(passwordEncoder.encode("chef123"));
+                chef.setRole(Role.CHEF_PROJET);
+                chef.setEmploye(employeOpt.get());
+                userRepository.save(chef);
+            }
         }
     }
 }

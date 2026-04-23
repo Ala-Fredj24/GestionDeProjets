@@ -11,9 +11,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.projetjee.backend.dto.RapportFinancierProjetDto;
 import com.projetjee.backend.service.RapportFinancierService;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+
 @RestController
 @RequestMapping("/api/rapports-financiers")
 @CrossOrigin(origins = "http://localhost:4200")
+@SecurityRequirement(name = "bearerAuth")
 public class RapportFinancierController {
 
     private final RapportFinancierService rapportFinancierService;

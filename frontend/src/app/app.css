@@ -307,3 +307,7 @@
   font-weight: 600;
   cursor: pointer;
 }
+
+.logout-button:hover {
+  background: #fee2e2;
+}

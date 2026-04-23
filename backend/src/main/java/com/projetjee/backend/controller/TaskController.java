@@ -9,11 +9,13 @@ import org.springframework.web.bind.annotation.*;
 import com.projetjee.backend.entity.Task;
 import com.projetjee.backend.service.TaskService;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/taches")
 @CrossOrigin(origins = "http://localhost:4200")
+@SecurityRequirement(name = "bearerAuth")
 public class TaskController {
 
     private final TaskService taskService;

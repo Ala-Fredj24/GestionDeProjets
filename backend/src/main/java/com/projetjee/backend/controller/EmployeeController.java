@@ -9,11 +9,13 @@ import org.springframework.web.bind.annotation.*;
 import com.projetjee.backend.entity.Employee;
 import com.projetjee.backend.service.EmployeeService;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/employes")
 @CrossOrigin(origins = "http://localhost:4200")
+@SecurityRequirement(name = "bearerAuth")
 public class EmployeeController {
 
     private final EmployeeService employeeService;
