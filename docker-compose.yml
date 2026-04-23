@@ -1,0 +1,31 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: gestionprojet-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: gestion_projet
+      MYSQL_USER: appuser
+      MYSQL_PASSWORD: apppass
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  gestion-phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: gestion-phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: host.docker.internal
+      PMA_PORT: 3306
+      UPLOAD_LIMIT: 512M
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "127.0.0.1:8084:80"
+
+volumes:
+  mysql_data:
+ 
