@@ -1,11 +1,11 @@
-<div class="app-shell">
+<div *ngIf="!estPageConnexion(); else loginView" class="app-shell">
   <aside class="sidebar">
     <div class="sidebar-top">
       <div class="brand">
         <div class="brand-logo">GP</div>
         <div class="brand-text">
           <h1>GestionProjet</h1>
-          <p>Workspace professionnel</p>
+          <p>Espace sécurisé</p>
         </div>
       </div>
     </div>
@@ -13,13 +13,28 @@
     <div class="sidebar-section">
       <p class="section-label">Navigation</p>
 
-      <a routerLink="/" [routerLinkActiveOptions]="{ exact: true }" routerLinkActive="active-link" class="nav-link">
+      <a
+        *ngIf="estAdmin()"
+        routerLink="/admin/dashboard"
+        routerLinkActive="active-link"
+        class="nav-link"
+      >
         <span class="nav-icon">📊</span>
-        <span class="nav-text">Tableau de bord</span>
+        <span class="nav-text">Dashboard Admin</span>
+      </a>
+
+      <a
+        *ngIf="estChefProjet()"
+        routerLink="/chef/dashboard"
+        routerLinkActive="active-link"
+        class="nav-link"
+      >
+        <span class="nav-icon">📊</span>
+        <span class="nav-text">Dashboard Chef</span>
       </a>
     </div>
 
-    <div class="sidebar-section">
+    <div class="sidebar-section" *ngIf="estAdmin()">
       <p class="section-label">Gestion</p>
 
       <div class="nav-group">
@@ -68,17 +83,28 @@
         <span class="nav-icon">💰</span>
         <span class="nav-text">Rapports financiers</span>
       </a>
+
       <a routerLink="/employes" routerLinkActive="active-link" class="nav-link">
         <span class="nav-icon">👥</span>
         <span class="nav-text">Employés</span>
       </a>
+    </div>
 
+    <div class="sidebar-section" *ngIf="estChefProjet()">
+      <p class="section-label">Mes accès</p>
+
+      <a routerLink="/chef/dashboard" routerLinkActive="active-link" class="nav-link">
+        <span class="nav-icon">📂</span>
+        <span class="nav-text">Mes projets</span>
+      </a>
     </div>
 
     <div class="sidebar-footer">
       <div class="workspace-card">
         <p class="workspace-title">Espace de travail</p>
-        <p class="workspace-text">Suivi des projets, budget et ressources en temps réel.</p>
+        <p class="workspace-text">
+          Suivi des projets, budget et ressources en temps réel.
+        </p>
       </div>
     </div>
   </aside>
@@ -87,18 +113,27 @@
     <header class="topbar">
       <div>
         <h2>Plateforme de gestion de projet</h2>
-        <p>Suivi intelligent des projets et des tâches</p>
+        <p>
+          {{ authService.utilisateur()?.email }} — {{ authService.utilisateur()?.role }}
+        </p>
       </div>
 
       <div class="topbar-actions">
-        <div class="status-chip">En ligne</div>
+        <div class="status-chip">Connecté</div>
+
         <div class="user-box">
-          <div class="user-avatar">A</div>
+          <div class="user-avatar">
+            {{ authService.utilisateur()?.email?.charAt(0)?.toUpperCase() || 'U' }}
+          </div>
           <div>
-            <strong>Admin</strong>
-            <p>Responsable projet</p>
+            <strong>{{ authService.utilisateur()?.role }}</strong>
+            <p>{{ authService.utilisateur()?.email }}</p>
           </div>
         </div>
+
+        <button type="button" class="logout-button" (click)="deconnexion()">
+          Déconnexion
+        </button>
       </div>
     </header>
 
@@ -107,3 +142,7 @@
     </main>
   </div>
 </div>
+
+<ng-template #loginView>
+  <router-outlet></router-outlet>
+</ng-template>

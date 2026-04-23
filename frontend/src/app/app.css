@@ -297,3 +297,13 @@
 .content {
   padding: 28px;
 }
+.logout-button {
+  height: 42px;
+  padding: 0 16px;
+  border-radius: 12px;
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-weight: 600;
+  cursor: pointer;
+}

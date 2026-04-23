@@ -53,4 +53,7 @@ export class ProjectService {
   affecterEmployesAuProjet(projetId: number, employeIds: number[]): Observable<Project> {
     return this.http.put<Project>(`${this.apiUrl}/${projetId}/employes`, employeIds);
   } 
+  chargerMesProjetsChef(): Observable<Project[]> {
+  return this.http.get<Project[]>(`${environment.apiBaseUrl}/chef/projets`);
+}
 }

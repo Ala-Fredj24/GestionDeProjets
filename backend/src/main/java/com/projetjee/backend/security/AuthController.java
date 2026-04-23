@@ -3,7 +3,7 @@ package com.projetjee.backend.security;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
+//import com.projetjee.backend.security.AuthResponse;
 import com.projetjee.backend.security.dto.AuthLoginRequest;
 
 @RestController
