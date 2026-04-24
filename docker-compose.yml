@@ -1,31 +1,103 @@
+version: '3.8'
+
 services:
+  # MySQL Database
   mysql:
     image: mysql:8.0
     container_name: gestionprojet-mysql
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: gestion_projet
-      MYSQL_USER: appuser
-      MYSQL_PASSWORD: apppass
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-gestion_projet}
+      MYSQL_USER: ${MYSQL_USER:-appuser}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-apppass}
     ports:
-      - "3306:3306"
+      - "${MYSQL_PORT:-3306}:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - gestion-network
 
-  gestion-phpmyadmin:
+  # phpMyAdmin for MySQL management
+  phpmyadmin:
     image: phpmyadmin:latest
     container_name: gestion-phpmyadmin
     restart: unless-stopped
+    depends_on:
+      - mysql
     environment:
-      PMA_HOST: host.docker.internal
+      PMA_HOST: mysql
       PMA_PORT: 3306
+      PMA_USER: ${MYSQL_USER:-appuser}
+      PMA_PASSWORD: ${MYSQL_PASSWORD:-apppass}
       UPLOAD_LIMIT: 512M
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     ports:
-      - "127.0.0.1:8084:80"
+      - "8084:80"
+    networks:
+      - gestion-network
+
+  # Backend Spring Boot Application
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: gestionprojet-backend
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-gestion_projet}?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER:-appuser}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD:-apppass}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILE:-docker}
+      SERVER_PORT: 8085
+    ports:
+      - "${BACKEND_PORT:-8085}:8085"
+    volumes:
+      - ./backend:/app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8085/api/projets"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - gestion-network
+
+  # Frontend Angular Application
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: gestionprojet-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      BACKEND_URL: http://backend:8085
+    ports:
+      - "${FRONTEND_PORT:-4200}:4200"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:4200/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - gestion-network
 
 volumes:
   mysql_data:
+    driver: local
+
+networks:
+  gestion-network:
+    driver: bridge
  

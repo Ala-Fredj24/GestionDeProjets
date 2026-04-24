@@ -144,21 +144,38 @@ Exemples cohérents avec l'historique du repo :
 
 ---
 
-## Phase 8 — Conteneurisation applicative complète (backend + frontend + mysql) [TODO]
+## Phase 8 — Conteneurisation applicative complète (backend + frontend + mysql) [DONE]
 
 **Objectif :** passer d'un `docker-compose` DB-only à une stack complète.
 
-**Travaux :**
-- ajouter `Dockerfile` backend (Spring Boot)
-- ajouter `Dockerfile` frontend (Angular build + serveur web)
-- compléter le `docker-compose.yml` racine avec `backend`, `frontend`, `mysql`
-- externaliser les variables d'environnement (sans secrets en dur)
-- documenter la procédure unique de démarrage local conteneurisé
+**Travaux complétés :**
+- ✅ ajouté `Dockerfile` backend (Spring Boot multi-stage build)
+- ✅ ajouté `Dockerfile` frontend (Angular build + nginx serveur)
+- ✅ complété le `docker-compose.yml` racine avec `backend`, `frontend`, `mysql`, `phpmyadmin`
+- ✅ externalisé les variables d'environnement (`.env.example`)
+- ✅ créé `application-docker.properties` pour profil Spring Docker
+- ✅ ajouté `.dockerignore` pour optimiser les builds
+- ✅ créé `nginx.conf` pour servir l'application Angular
+- ✅ documenté la procédure complète (`DOCKER.md`)
 
 **Définition of done :**
-- la stack complète démarre via Docker sans lancer manuellement backend/frontend
+- ✅ la stack complète démarre via Docker sans lancer manuellement backend/frontend
 
-**Branch git proposée :** `feat/devops-conteneurisation-stack-complete`
+**Branch git :** `chore/sauvegarde-etat-avant-refonte-architectureAuth-role`
+
+**Commandes de démarrage :**
+```bash
+docker-compose up --build        # Build et démarrer tous les services
+docker-compose down              # Arrêter tous les services
+docker-compose logs -f backend   # Voir les logs en temps réel
+docker-compose ps                # Voir l'état des services
+```
+
+**Services disponibles :**
+- Frontend: http://localhost:4200
+- Backend: http://localhost:8085/api
+- Swagger: http://localhost:8085/api/swagger-ui.html
+- phpMyAdmin: http://localhost:8084
 
 ---
 
