@@ -49,8 +49,8 @@ class RapportFinancierProjetDtoTest {
     @DisplayName("Should set and get budgetProjet")
     void testBudgetProjet() {
         BigDecimal budget = BigDecimal.valueOf(10000.0);
-        dto.setbudgetProjet(budget);
-        assertEquals(budget, dto.getbudgetProjet());
+        dto.setBudgetProjet(budget);
+        assertEquals(budget, dto.getBudgetProjet());
     }
 
     @Test
@@ -126,7 +126,7 @@ class RapportFinancierProjetDtoTest {
         assertEquals(1L, dtoFull.getProjetId());
         assertEquals("Test Project", dtoFull.getNomProjet());
         assertEquals("En_Cours", dtoFull.getStatutProjet());
-        assertEquals(budget, dtoFull.getbudgetProjet());
+        assertEquals(budget, dtoFull.getBudgetProjet());
         assertEquals(coutPrevu, dtoFull.getCoutPrevuTotal());
         assertEquals(coutReel, dtoFull.getCoutReelTotal());
         assertEquals(ecart, dtoFull.getEcartPrevuReel());
@@ -142,8 +142,8 @@ class RapportFinancierProjetDtoTest {
         dto.setNomProjet(null);
         assertNull(dto.getNomProjet());
 
-        dto.setbudgetProjet(null);
-        assertNull(dto.getbudgetProjet());
+        dto.setBudgetProjet(null);
+        assertNull(dto.getBudgetProjet());
     }
 
     @Test
@@ -153,11 +153,11 @@ class RapportFinancierProjetDtoTest {
         BigDecimal bd2 = BigDecimal.valueOf(2000);
         BigDecimal bd3 = new BigDecimal("3000.123456");
 
-        dto.setbudgetProjet(bd1);
+        dto.setBudgetProjet(bd1);
         dto.setCoutPrevuTotal(bd2);
         dto.setCoutReelTotal(bd3);
 
-        assertEquals(bd1, dto.getbudgetProjet());
+        assertEquals(bd1, dto.getBudgetProjet());
         assertEquals(bd2, dto.getCoutPrevuTotal());
         assertEquals(bd3, dto.getCoutReelTotal());
     }

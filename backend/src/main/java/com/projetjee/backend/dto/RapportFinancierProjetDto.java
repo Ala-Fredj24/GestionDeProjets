@@ -59,11 +59,11 @@ public class RapportFinancierProjetDto {
         this.statutProjet = statutProjet;
     }
 
-    public BigDecimal getbudgetProjet() {
+    public BigDecimal getBudgetProjet() {
         return budgetProjet;
     }
 
-    public void setbudgetProjet(BigDecimal budgetProjet) {
+    public void setBudgetProjet(BigDecimal budgetProjet) {
         this.budgetProjet = budgetProjet;
     }
 
