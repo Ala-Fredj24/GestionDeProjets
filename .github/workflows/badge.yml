@@ -1,0 +1,23 @@
+name: Build Status Badge
+
+on:
+  workflow_run:
+    workflows: [CI - Build & Test]
+    types: [completed]
+
+jobs:
+  update-badge:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create badge based on workflow status
+        run: |
+          if [ "${{ github.event.workflow_run.conclusion }}" == "success" ]; then
+            echo "✅ Build passing"
+          else
+            echo "❌ Build failing"
+          fi
