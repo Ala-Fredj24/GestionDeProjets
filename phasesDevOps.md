@@ -6,6 +6,28 @@ Ce fichier reflète l'état réel du repo actuel :
 - base MySQL + phpMyAdmin via `docker-compose.yml`
 - branches Git de travail basées sur `feat/...` et `chore/...`, avec intégration vers `dev`
 
+## Résumé des phases
+
+| Phase | Titre | Statut | Complété |
+|-------|-------|--------|----------|
+| 1 | Stratégie de tests & couverture > 80% | ✅ DONE | d640e29 |
+| 2 | CRUD Projets et Tâches | ✅ DONE | hist |
+| 3 | Affectation des ressources | ✅ DONE | hist |
+| 4 | Suivi des coûts & rapports | ✅ DONE | hist |
+| 5 | Authentification JWT & rôles | ✅ DONE | hist |
+| 6 | Login frontend & routage rôle | ✅ DONE | hist |
+| 7 | Stabilisation configuration locale | ✅ DONE | hist |
+| 8 | Conteneurisation complète | ✅ DONE | 1f2df6e |
+| 9 | CI GitHub Actions | 📋 TODO | - |
+| 10 | Quality gate & sécurité | 📋 TODO | - |
+| 11 | Déploiement Kubernetes | 📋 TODO | - |
+| 12 | Observabilité (logs + métriques) | 📋 TODO | - |
+| 13 | Finalisation & soutenance | 📋 TODO | - |
+
+**Avancement global :** 8/13 phases (61%) ✅
+
+---
+
 ## Convention de branches Git (adaptée à ce repo)
 
 - **Base d'intégration :** `dev`
