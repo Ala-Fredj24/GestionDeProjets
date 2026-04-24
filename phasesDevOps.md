@@ -1,6 +1,6 @@
 # Phases du projet — version adaptée à `GestionDeProjets`
 
-Ce fichier remplace l'ancienne version (provenant d'un autre projet) et reflète l'état réel du repo actuel :
+Ce fichier reflète l'état réel du repo actuel :
 - backend Spring Boot (port `8085`)
 - frontend Angular (port `4200`)
 - base MySQL + phpMyAdmin via `docker-compose.yml`
