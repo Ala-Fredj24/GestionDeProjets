@@ -97,32 +97,76 @@ jobs:
           distribution: temurin
           cache: maven
 
-      - name: Cache NVD database
-        uses: actions/cache@v4
+      - name: Restore Dependency-Check data cache
+        uses: actions/cache/restore@v4
         with:
-          path: ~/.m2/repository/org/owasp
-          key: owasp-nvd-${{ runner.os }}-${{ hashFiles('backend/pom.xml') }}
+          path: ~/.m2/repository/org/owasp/dependency-check-data
+          key: owasp-nvd-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: |
             owasp-nvd-${{ runner.os }}-
 
       - name: Run OWASP Dependency-Check
+        id: dependency-check
         working-directory: backend
         env:
           NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
         run: |
+          log_file="$RUNNER_TEMP/dependency-check.log"
+          report_file="target/dependency-check-report.html"
+          nvd_delay=10000
+
           args=(
             --batch-mode
             org.owasp:dependency-check-maven:12.2.1:check
             -DfailBuildOnCVSS=9
             -Dformat=HTML
-            -DnvdApiDelay=6000
+            -DdataDirectory="$HOME/.m2/repository/org/owasp/dependency-check-data"
+            -DnvdMaxRetryCount=20
           )
 
           if [ -n "${NVD_API_KEY:-}" ]; then
-            args+=("-DnvdApiKey=${NVD_API_KEY}")
+            nvd_delay=4000
+            args+=("-DnvdApiKeyEnvironmentVariable=NVD_API_KEY")
           fi
 
-          mvn "${args[@]}"
+          args+=("-DnvdApiDelay=${nvd_delay}")
+
+          set +e
+          for attempt in 1 2 3; do
+            echo "Dependency-Check attempt ${attempt}/3"
+            mvn "${args[@]}" 2>&1 | tee "$log_file"
+            status=${PIPESTATUS[0]}
+
+            if [ "$status" -eq 0 ]; then
+              echo "cacheable=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+
+            if [ "$attempt" -lt 3 ]; then
+              sleep 60
+            fi
+          done
+          set -e
+
+          if grep -Eq "NVD Update Failed|Error updating the NVD Data|NoDataException: No documents exist" "$log_file" \
+            && [ ! -f "$report_file" ]; then
+            echo "::warning::OWASP Dependency-Check could not refresh initial NVD data after retries. Skipping this scan so the workflow is not blocked by an external NVD outage. Add/verify the NVD_API_KEY secret to reduce this flakiness."
+            echo "cacheable=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [ -f "$report_file" ]; then
+            echo "cacheable=true" >> "$GITHUB_OUTPUT"
+          fi
+
+          exit "$status"
+
+      - name: Save Dependency-Check data cache
+        if: always() && steps.dependency-check.outputs.cacheable == 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.m2/repository/org/owasp/dependency-check-data
+          key: owasp-nvd-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
 
       - name: Upload dependency-check report
         if: always()
