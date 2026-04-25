@@ -1,5 +1,5 @@
-# Déploiement Grafana avec provisioning automatique de la datasource Prometheus.
-# Les dashboards peuvent être ajoutés plus tard dans un ConfigMap Grafana dédié.
+# Déploiement Grafana avec provisioning automatique de la datasource Prometheus
+# et des dashboards GestionDeProjets.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -38,6 +38,10 @@ spec:
           volumeMounts:
             - name: datasources
               mountPath: /etc/grafana/provisioning/datasources
+            - name: dashboard-providers
+              mountPath: /etc/grafana/provisioning/dashboards
+            - name: dashboards
+              mountPath: /etc/grafana/provisioned-dashboards/gestiondeprojets
             - name: data
               mountPath: /var/lib/grafana
           readinessProbe:
@@ -63,6 +67,12 @@ spec:
         - name: datasources
           configMap:
             name: grafana-datasources
+        - name: dashboard-providers
+          configMap:
+            name: grafana-dashboard-providers
+        - name: dashboards
+          configMap:
+            name: grafana-dashboards
         - name: data
           persistentVolumeClaim:
             claimName: grafana-data

@@ -120,7 +120,7 @@ services:
       GF_SECURITY_ADMIN_PASSWORD: admin
     volumes:
       - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
-      - ./observability/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - ./k8s/base/monitoring/grafana/dashboards:/etc/grafana/provisioned-dashboards/gestiondeprojets:ro
     ports:
       - "3000:3000"
     networks:

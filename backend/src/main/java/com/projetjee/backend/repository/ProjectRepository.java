@@ -1,13 +1,16 @@
 package com.projetjee.backend.repository;
 
-import org.springframework.stereotype.Repository;
-
+import java.math.BigDecimal;
 import java.util.List;
+
+import org.springframework.stereotype.Repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import com.projetjee.backend.entity.Project;
+import com.projetjee.backend.enums.ProjectStatus;
+
 @Repository
 public interface ProjectRepository extends JpaRepository<Project, Long> {
 
@@ -18,4 +21,9 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
         where p.chefProjet.id = :employeeId or e.id = :employeeId
     """)
     List<Project> findVisibleProjectsForEmployee(Long employeeId);
+
+    long countByStatut(ProjectStatus statut);
+
+    @Query("select coalesce(sum(p.budget), 0) from Project p")
+    BigDecimal sumBudget();
 }
