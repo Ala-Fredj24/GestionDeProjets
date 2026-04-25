@@ -183,9 +183,22 @@ Install Argo CD:
 
 ```bash
 kubectl apply -f k8s/argocd/namespace.yaml
-kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+kubectl apply --server-side --force-conflicts -n argocd \
+  -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 kubectl wait --for=condition=available deployment/argocd-server -n argocd --timeout=300s
 ```
+
+Use server-side apply here because the Argo CD `applicationsets.argoproj.io`
+CRD is large enough to exceed the annotation limit used by normal
+client-side `kubectl apply`. If you already ran the old command and got:
+
+```text
+metadata.annotations: Too long: may not be more than 262144 bytes
+```
+
+rerun the server-side apply command above. It will complete the partial
+installation by creating the missing CRD and reconciling the resources that
+were already created.
 
 Get the initial admin password:
 
