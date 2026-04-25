@@ -22,25 +22,6 @@ services:
       retries: 5
     networks:
       - gestion-network
-
-  # phpMyAdmin for MySQL management
-  phpmyadmin:
-    image: phpmyadmin:latest
-    container_name: gestion-phpmyadmin
-    restart: unless-stopped
-    depends_on:
-      - mysql
-    environment:
-      PMA_HOST: mysql
-      PMA_PORT: 3306
-      PMA_USER: ${MYSQL_USER:-appuser}
-      PMA_PASSWORD: ${MYSQL_PASSWORD:-apppass}
-      UPLOAD_LIMIT: 512M
-    ports:
-      - "8084:80"
-    networks:
-      - gestion-network
-
   # Backend Spring Boot Application
   backend:
     build:
