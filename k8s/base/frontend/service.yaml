@@ -1,0 +1,21 @@
+# Service frontend — expose le port 4200 (nginx) à l'intérieur du cluster.
+# Type ClusterIP dans la base : non accessible directement depuis l'hôte.
+# L'overlay local patche ce Service en NodePort (port 30080) pour permettre
+# l'accès depuis le navigateur sur http://localhost:30080.
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  namespace: gestiondeprojets
+  labels:
+    app: gestiondeprojets
+    component: frontend
+spec:
+  selector:
+    app: gestiondeprojets
+    component: frontend
+  ports:
+    - name: http
+      port: 4200
+      targetPort: 4200
+  type: ClusterIP

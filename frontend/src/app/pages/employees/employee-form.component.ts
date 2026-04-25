@@ -56,20 +56,82 @@ import { EmployeeService } from '../../services/employee.service';
       </div>
     </section>
   `,
-  styles: [`
-    .page { display: flex; flex-direction: column; gap: 24px; }
-    .page-header { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
-    .form-card { background: #fff; border-radius: 24px; padding: 28px; border: 1px solid #eef2f7; box-shadow: 0 10px 30px rgba(15,23,42,0.05); }
-    .grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 20px; }
-    .field { display: flex; flex-direction: column; gap: 8px; }
-    input { height: 48px; border: 1px solid #dbe3ef; border-radius: 14px; padding: 0 14px; }
-    .actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }
-    .primary-button, .secondary-button { height: 44px; padding: 0 18px; border-radius: 12px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; border: none; cursor: pointer; }
-    .primary-button { background: linear-gradient(135deg,#2563eb,#1d4ed8); color: white; }
-    .secondary-button { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
-    .alert { padding: 14px 16px; border-radius: 14px; margin-bottom: 18px; }
-    .error { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
-  `]
+  styles: [
+    `
+      .page {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+      }
+      .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+      }
+      .form-card {
+        background: #fff;
+        border-radius: 24px;
+        padding: 28px;
+        border: 1px solid #eef2f7;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px;
+      }
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      input {
+        height: 48px;
+        border: 1px solid #dbe3ef;
+        border-radius: 14px;
+        padding: 0 14px;
+      }
+      .actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        margin-top: 24px;
+      }
+      .primary-button,
+      .secondary-button {
+        height: 44px;
+        padding: 0 18px;
+        border-radius: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        cursor: pointer;
+      }
+      .primary-button {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        color: white;
+      }
+      .secondary-button {
+        background: #eff6ff;
+        color: #1d4ed8;
+        border: 1px solid #bfdbfe;
+      }
+      .alert {
+        padding: 14px 16px;
+        border-radius: 14px;
+        margin-bottom: 18px;
+      }
+      .error {
+        background: #fef2f2;
+        color: #b91c1c;
+        border: 1px solid #fecaca;
+      }
+    `,
+  ],
 })
 export class EmployeeFormComponent implements OnInit {
   private fb = inject(FormBuilder);
@@ -85,7 +147,7 @@ export class EmployeeFormComponent implements OnInit {
     nom: ['', [Validators.required, Validators.minLength(2)]],
     email: ['', [Validators.required, Validators.email]],
     role: ['', Validators.required],
-    equipe: ['', Validators.required]
+    equipe: ['', Validators.required],
   });
 
   ngOnInit(): void {
@@ -101,12 +163,12 @@ export class EmployeeFormComponent implements OnInit {
             nom: employe.nom,
             email: employe.email,
             role: employe.role,
-            equipe: employe.equipe
+            equipe: employe.equipe,
           });
         },
         error: () => {
           this.messageErreur = 'Impossible de charger cet employé.';
-        }
+        },
       });
     }
   }
@@ -121,7 +183,7 @@ export class EmployeeFormComponent implements OnInit {
       nom: this.formulaire.value.nom as string,
       email: this.formulaire.value.email as string,
       role: this.formulaire.value.role as string,
-      equipe: this.formulaire.value.equipe as string
+      equipe: this.formulaire.value.equipe as string,
     };
 
     if (this.modeEdition && this.employeId) {
@@ -129,7 +191,7 @@ export class EmployeeFormComponent implements OnInit {
         next: () => this.router.navigateByUrl('/employes'),
         error: (error) => {
           this.messageErreur = error?.error?.message || 'Erreur lors de la mise à jour.';
-        }
+        },
       });
       return;
     }
@@ -138,7 +200,7 @@ export class EmployeeFormComponent implements OnInit {
       next: () => this.router.navigateByUrl('/employes'),
       error: (error) => {
         this.messageErreur = error?.error?.message || 'Erreur lors de la création.';
-      }
+      },
     });
   }
 }

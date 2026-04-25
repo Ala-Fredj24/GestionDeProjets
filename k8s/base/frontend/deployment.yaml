@@ -1,0 +1,59 @@
+# Deployment du frontend Angular servi par nginx.
+# nginx utilise le nginx.conf de l'image (copié depuis frontend/nginx.conf lors du build Docker).
+# Ce fichier configure le proxy /api/ → http://backend:8085, ce qui signifie
+# que l'Angular app appelle simplement /api/... et nginx achemine vers le backend.
+# Aucune variable d'environnement n'est nécessaire : tout passe par le proxy nginx.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: gestiondeprojets
+  labels:
+    app: gestiondeprojets
+    component: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gestiondeprojets
+      component: frontend
+  template:
+    metadata:
+      labels:
+        app: gestiondeprojets
+        component: frontend
+    spec:
+      containers:
+        - name: frontend
+          # L'image est construite localement puis chargée dans kind.
+          # L'overlay local remplace le tag via images[].newTag.
+          image: gestiondeprojets-frontend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 4200
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+          # Liveness : nginx répond-il encore ?
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 4200
+            initialDelaySeconds: 10
+            periodSeconds: 20
+            timeoutSeconds: 3
+            failureThreshold: 3
+          # Readiness : nginx est-il prêt à servir l'interface ?
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 4200
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3

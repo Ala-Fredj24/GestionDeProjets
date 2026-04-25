@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: prometheus-data
+  namespace: gestiondeprojets
+  labels:
+    app.kubernetes.io/name: prometheus
+    app.kubernetes.io/part-of: gestiondeprojets-monitoring
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi

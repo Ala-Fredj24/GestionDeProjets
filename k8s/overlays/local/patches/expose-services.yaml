@@ -1,0 +1,34 @@
+# Patch local — expose le frontend et le backend en NodePort.
+# Ces patches sont appliqués par-dessus la base (ClusterIP) uniquement pour l'overlay local.
+# Ils n'affectent pas la base ni un éventuel overlay de production.
+#
+# Frontend : http://localhost:30080  → pod frontend port 4200
+# Backend  : http://localhost:30085  → pod backend port 8085 (pour tests directs)
+---
+# Patch pour le Service frontend
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  namespace: gestiondeprojets
+spec:
+  type: NodePort
+  ports:
+    - name: http
+      port: 4200
+      targetPort: 4200
+      nodePort: 30080
+---
+# Patch pour le Service backend
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  namespace: gestiondeprojets
+spec:
+  type: NodePort
+  ports:
+    - name: http
+      port: 8085
+      targetPort: 8085
+      nodePort: 30085

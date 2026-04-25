@@ -11,7 +11,7 @@ export interface Task {
   dateLimite: string;
   coutReel: number;
   coutPrevu: number;
-  employeAssigne?: Employee|null;
+  employeAssigne?: Employee | null;
 }
 export interface TaskPayload {
   projet: {
@@ -24,5 +24,5 @@ export interface TaskPayload {
   dateLimite: string;
   coutReel: number;
   coutPrevu: number;
-  employeAssigne?:{ id: number }|null;
+  employeAssigne?: { id: number } | null;
 }

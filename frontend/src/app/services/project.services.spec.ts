@@ -11,7 +11,7 @@ describe('ProjectService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
-      providers: [ProjectService]
+      providers: [ProjectService],
     });
 
     service = TestBed.inject(ProjectService);
@@ -29,8 +29,22 @@ describe('ProjectService', () => {
   describe('recupererTousLesProjets', () => {
     it('should fetch all projects', () => {
       const mockProjects: Project[] = [
-        { id: 1, nom: 'Project 1', dateDebut: '2024-01-01', dateFin: '2024-12-31', budget: 10000, statut: 'En_Cours' } as Project,
-        { id: 2, nom: 'Project 2', dateDebut: '2024-02-01', dateFin: '2024-11-30', budget: 15000, statut: 'Programmé' } as Project
+        {
+          id: 1,
+          nom: 'Project 1',
+          dateDebut: '2024-01-01',
+          dateFin: '2024-12-31',
+          budget: 10000,
+          statut: 'En_Cours',
+        } as Project,
+        {
+          id: 2,
+          nom: 'Project 2',
+          dateDebut: '2024-02-01',
+          dateFin: '2024-11-30',
+          budget: 15000,
+          statut: 'Programmé',
+        } as Project,
       ];
 
       service.recupererTousLesProjets().subscribe((projects: Project[]) => {
@@ -52,7 +66,7 @@ describe('ProjectService', () => {
         dateDebut: '2024-01-01',
         dateFin: '2024-12-31',
         budget: 10000,
-        statut: 'En_Cours'
+        statut: 'En_Cours',
       } as Project;
 
       service.recupererProjetParId(1).subscribe((project: Project) => {
@@ -72,7 +86,7 @@ describe('ProjectService', () => {
         nom: 'New Project',
         dateDebut: '2024-01-01',
         dateFin: '2024-12-31',
-        budget: 20000
+        budget: 20000,
       } as ProjectPayload;
 
       const mockResponse: Project = { id: 3, ...newProject, statut: 'Programmé' } as Project;
@@ -95,7 +109,7 @@ describe('ProjectService', () => {
         nom: 'Updated Project',
         dateDebut: '2024-02-01',
         dateFin: '2024-11-30',
-        budget: 25000
+        budget: 25000,
       } as ProjectPayload;
 
       const mockResponse: Project = { id: 1, ...updateData, statut: 'En_Cours' } as Project;
@@ -123,4 +137,3 @@ describe('ProjectService', () => {
     });
   });
 });
-

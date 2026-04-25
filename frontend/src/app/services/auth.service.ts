@@ -7,7 +7,7 @@ import { environment } from '../../environments/environment';
 import { AuthLoginRequest, AuthResponse, AuthUser, UserRole } from '../models/auth.models';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
   private http = inject(HttpClient);
@@ -32,14 +32,16 @@ export class AuthService {
     return this.http.post<AuthResponse>(`${this.apiUrl}/login`, payload).pipe(
       tap((response) => {
         this.sauvegarderSession(response);
-      })
+      }),
     );
   }
 
   deconnexion(): void {
-    if (this.estNavigateur()) {
-      localStorage.removeItem(this.tokenKey);
-      localStorage.removeItem(this.userKey);
+    const storage = this.getStorage();
+
+    if (storage) {
+      storage.removeItem(this.tokenKey);
+      storage.removeItem(this.userKey);
     }
 
     this.token.set(null);
@@ -89,12 +91,14 @@ export class AuthService {
     const utilisateur: AuthUser = {
       email: response.email,
       role: response.role,
-      employeeId: response.employeeId
+      employeeId: response.employeeId,
     };
 
-    if (this.estNavigateur()) {
-      localStorage.setItem(this.tokenKey, response.token);
-      localStorage.setItem(this.userKey, JSON.stringify(utilisateur));
+    const storage = this.getStorage();
+
+    if (storage) {
+      storage.setItem(this.tokenKey, response.token);
+      storage.setItem(this.userKey, JSON.stringify(utilisateur));
     }
 
     this.token.set(response.token);
@@ -102,19 +106,23 @@ export class AuthService {
   }
 
   private lireTokenDepuisStorage(): string | null {
-    if (!this.estNavigateur()) {
+    const storage = this.getStorage();
+
+    if (!storage) {
       return null;
     }
 
-    return localStorage.getItem(this.tokenKey);
+    return storage.getItem(this.tokenKey);
   }
 
   private lireUtilisateurDepuisStorage(): AuthUser | null {
-    if (!this.estNavigateur()) {
+    const storage = this.getStorage();
+
+    if (!storage) {
       return null;
     }
 
-    const raw = localStorage.getItem(this.userKey);
+    const raw = storage.getItem(this.userKey);
 
     if (!raw) {
       return null;
@@ -129,5 +137,23 @@ export class AuthService {
 
   private estNavigateur(): boolean {
     return isPlatformBrowser(this.platformId);
+  }
+
+  private getStorage(): Storage | null {
+    if (!this.estNavigateur() || typeof localStorage === 'undefined') {
+      return null;
+    }
+
+    const storage = localStorage as Partial<Storage>;
+
+    if (
+      typeof storage.getItem !== 'function' ||
+      typeof storage.setItem !== 'function' ||
+      typeof storage.removeItem !== 'function'
+    ) {
+      return null;
+    }
+
+    return localStorage;
   }
 }

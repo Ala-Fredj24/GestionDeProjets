@@ -5,7 +5,7 @@
     radial-gradient(circle at top left, rgba(59, 130, 246, 0.18), transparent 30%),
     radial-gradient(circle at top right, rgba(99, 102, 241, 0.18), transparent 28%),
     linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
-  font-family: "Inter", "Segoe UI", Roboto, Arial, sans-serif;
+  font-family: 'Inter', 'Segoe UI', Roboto, Arial, sans-serif;
   color: #0f172a;
 }
 
@@ -25,7 +25,7 @@ h2 {
 }
 
 h2::after {
-  content: "";
+  content: '';
   display: block;
   width: 72px;
   height: 4px;
@@ -62,7 +62,7 @@ h2::after {
 }
 
 .card::before {
-  content: "";
+  content: '';
   position: absolute;
   inset: 0 auto auto 0;
   width: 100%;

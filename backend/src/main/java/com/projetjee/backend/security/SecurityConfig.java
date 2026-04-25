@@ -36,7 +36,11 @@ public class SecurityConfig {
                         "/api/auth/**",
                         "/swagger-ui.html",
                         "/swagger-ui/**",
-                        "/v3/api-docs/**"
+                        "/v3/api-docs/**",
+                        "/actuator/health",
+                        "/actuator/prometheus",
+                        "/api/actuator/health",
+                        "/api/actuator/prometheus"
                 ).permitAll()
 
                 .requestMatchers("/api/chef/**").hasRole("CHEF_PROJET")

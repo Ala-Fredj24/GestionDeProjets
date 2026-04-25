@@ -6,7 +6,7 @@ import { environment } from '../../environments/environment';
 import { RapportFinancierProjet } from '../models/rapport-financier.models';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ProjectService {
   private http = inject(HttpClient);
@@ -15,7 +15,7 @@ export class ProjectService {
   readonly projets = signal<Project[]>([]);
   readonly totalProjets = computed(() => this.projets().length);
   readonly budgetTotal = computed(() =>
-    this.projets().reduce((somme, projet) => somme + Number(projet.budget || 0), 0)
+    this.projets().reduce((somme, projet) => somme + Number(projet.budget || 0), 0),
   );
 
   recupererTousLesProjets(): Observable<Project[]> {
@@ -23,16 +23,14 @@ export class ProjectService {
   }
 
   chargerTousLesProjets(): Observable<Project[]> {
-    return this.http.get<Project[]>(this.apiUrl).pipe(
-      tap((projets) => this.projets.set(projets))
-    );
+    return this.http.get<Project[]>(this.apiUrl).pipe(tap((projets) => this.projets.set(projets)));
   }
 
   recupererProjetParId(id: number): Observable<Project> {
     return this.http.get<Project>(`${this.apiUrl}/${id}`);
   }
 
-  creerProjet(payload: ProjectPayload): Observable<Project> { 
+  creerProjet(payload: ProjectPayload): Observable<Project> {
     return this.http.post<Project>(this.apiUrl, payload);
   }
 
@@ -52,8 +50,8 @@ export class ProjectService {
   }
   affecterEmployesAuProjet(projetId: number, employeIds: number[]): Observable<Project> {
     return this.http.put<Project>(`${this.apiUrl}/${projetId}/employes`, employeIds);
-  } 
+  }
   chargerMesProjetsChef(): Observable<Project[]> {
-  return this.http.get<Project[]>(`${environment.apiBaseUrl}/chef/projets`);
-}
+    return this.http.get<Project[]>(`${environment.apiBaseUrl}/chef/projets`);
+  }
 }

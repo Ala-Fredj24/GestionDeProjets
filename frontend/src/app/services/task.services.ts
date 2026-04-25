@@ -5,7 +5,7 @@ import { Task, TaskPayload } from '../models/task.models';
 import { environment } from '../../environments/environment';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class TaskService {
   private http = inject(HttpClient);
@@ -18,9 +18,7 @@ export class TaskService {
   }
 
   chargerToutesLesTaches(): Observable<Task[]> {
-    return this.http.get<Task[]>(this.apiUrl).pipe(
-      tap((taches) => this.taches.set(taches))
-    );
+    return this.http.get<Task[]>(this.apiUrl).pipe(tap((taches) => this.taches.set(taches)));
   }
 
   recupererTacheParId(id: number): Observable<Task> {

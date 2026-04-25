@@ -5,7 +5,7 @@ import { Employee, EmployeePayload } from '../models/employee.models';
 import { environment } from '../../environments/environment';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class EmployeeService {
   private http = inject(HttpClient);
@@ -14,9 +14,9 @@ export class EmployeeService {
   readonly totalEmployes = computed(() => this.employes().length);
 
   chargerTousLesEmployes(): Observable<Employee[]> {
-    return this.http.get<Employee[]>(this.apiUrl).pipe(
-      tap((employes) => this.employes.set(employes))
-    );
+    return this.http
+      .get<Employee[]>(this.apiUrl)
+      .pipe(tap((employes) => this.employes.set(employes)));
   }
 
   chargerEmployeParId(id: number): Observable<Employee> {

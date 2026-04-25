@@ -21,13 +21,16 @@ FROM nginx:alpine
 # Copy custom nginx config
 COPY nginx.conf /etc/nginx/nginx.conf
 
-# Copy built Angular app to nginx
-COPY --from=builder /app/dist/gestion-projet /usr/share/nginx/html
+# Copy the built Angular browser bundle to nginx.
+# Angular SSR builds emit index.csr.html, so rename it to index.html for nginx.
+COPY --from=builder /app/dist/frontend/browser/ /usr/share/nginx/html/
+RUN rm -f /usr/share/nginx/html/index.html && \
+    if [ -f /usr/share/nginx/html/index.csr.html ]; then \
+      mv /usr/share/nginx/html/index.csr.html /usr/share/nginx/html/index.html; \
+    fi
 
-# Create non-root user
-RUN addgroup -g 1000 nginx && \
-    adduser -u 1000 -S nginx -G nginx && \
-    chown -R nginx:nginx /usr/share/nginx/html
+# Run nginx as the non-root user already provided by the official image.
+RUN chown -R nginx:nginx /usr/share/nginx/html /var/cache/nginx /var/log/nginx /var/run
 
 USER nginx
 

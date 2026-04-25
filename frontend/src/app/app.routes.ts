@@ -11,7 +11,7 @@ import { LoginComponent } from './pages/auth/login.component';
 import { ChefDashboardComponent } from './pages/dashboard/chef-dashboard.component';
 import { AccessDeniedComponent } from './pages/shared/access-denied.component';
 import { authGuard } from './guards/auth.guard';
-import { roleGuard } from './guards/role.guard';  
+import { roleGuard } from './guards/role.guard';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -20,81 +20,81 @@ export const routes: Routes = [
     path: 'admin/dashboard',
     component: DashboardComponent,
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ADMIN'] }
+    data: { roles: ['ADMIN'] },
   },
   {
     path: 'chef/dashboard',
     component: ChefDashboardComponent,
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['CHEF_PROJET'] }
+    data: { roles: ['CHEF_PROJET'] },
   },
   {
     path: 'projets',
     component: ProjectListComponent,
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ADMIN'] }
+    data: { roles: ['ADMIN'] },
   },
   {
     path: 'projets/nouveau',
     component: ProjectFormComponent,
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ADMIN'] }
+    data: { roles: ['ADMIN'] },
   },
   {
     path: 'projets/:id/modifier',
     component: ProjectFormComponent,
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ADMIN'] }
+    data: { roles: ['ADMIN'] },
   },
   {
     path: 'taches',
     component: TaskListComponent,
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ADMIN'] }
+    data: { roles: ['ADMIN'] },
   },
   {
     path: 'taches/nouveau',
     component: TaskFormComponent,
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ADMIN'] }
+    data: { roles: ['ADMIN'] },
   },
   {
     path: 'taches/:id/modifier',
     component: TaskFormComponent,
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ADMIN'] }
+    data: { roles: ['ADMIN'] },
   },
   {
     path: 'rapports-financiers',
     component: FinancialReportComponent,
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ADMIN'] }
+    data: { roles: ['ADMIN'] },
   },
   {
     path: 'employes',
     component: EmployeeListComponent,
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ADMIN'] }
+    data: { roles: ['ADMIN'] },
   },
   {
     path: 'employes/nouveau',
     component: EmployeeFormComponent,
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ADMIN'] }
+    data: { roles: ['ADMIN'] },
   },
   {
     path: 'employes/:id/modifier',
     component: EmployeeFormComponent,
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ADMIN'] }
+    data: { roles: ['ADMIN'] },
   },
 
   {
     path: 'acces-refuse',
     component: AccessDeniedComponent,
-    canActivate: [authGuard]
+    canActivate: [authGuard],
   },
 
   { path: '', redirectTo: '/login', pathMatch: 'full' },
-  { path: '**', redirectTo: '/login' }
+  { path: '**', redirectTo: '/login' },
 ];

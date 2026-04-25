@@ -14,7 +14,13 @@ import { ProjectService } from '../../services/project.services';
       <div class="page-header">
         <div>
           <h1>{{ modeEdition ? 'Modifier le projet' : 'Nouveau projet' }}</h1>
-          <p>{{ modeEdition ? 'Mettre à jour le projet existant' : 'Créer un projet avec budget, dates et statut' }}</p>
+          <p>
+            {{
+              modeEdition
+                ? 'Mettre à jour le projet existant'
+                : 'Créer un projet avec budget, dates et statut'
+            }}
+          </p>
         </div>
 
         <a routerLink="/projets" class="secondary-button">Retour à la liste</a>
@@ -33,7 +39,12 @@ import { ProjectService } from '../../services/project.services';
           <div class="grid">
             <div class="field full-width">
               <label for="nom">Nom du projet</label>
-              <input id="nom" type="text" formControlName="nom" placeholder="Ex: Projet Gestion RH" />
+              <input
+                id="nom"
+                type="text"
+                formControlName="nom"
+                placeholder="Ex: Projet Gestion RH"
+              />
               <small *ngIf="f.nom.touched && f.nom.invalid">
                 Le nom est obligatoire et doit contenir au moins 3 caractères.
               </small>
@@ -74,166 +85,172 @@ import { ProjectService } from '../../services/project.services';
           </div>
 
           <div class="actions">
-            <button type="button" class="secondary-button" routerLink="/projets">
-              Annuler
-            </button>
+            <button type="button" class="secondary-button" routerLink="/projets">Annuler</button>
 
             <button type="submit" class="primary-button" [disabled]="enregistrementEnCours">
-              {{ enregistrementEnCours ? 'Enregistrement...' : (modeEdition ? 'Mettre à jour le projet' : 'Créer le projet') }}
+              {{
+                enregistrementEnCours
+                  ? 'Enregistrement...'
+                  : modeEdition
+                    ? 'Mettre à jour le projet'
+                    : 'Créer le projet'
+              }}
             </button>
           </div>
         </form>
       </div>
     </section>
   `,
-  styles: [`
-    .page {
-      display: flex;
-      flex-direction: column;
-      gap: 24px;
-    }
-
-    .page-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .page-header h1 {
-      margin: 0;
-      font-size: 28px;
-      color: #111827;
-    }
-
-    .page-header p {
-      margin: 8px 0 0;
-      color: #6b7280;
-    }
-
-    .form-card {
-      background: #ffffff;
-      border-radius: 24px;
-      padding: 28px;
-      border: 1px solid #eef2f7;
-      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 20px;
-    }
-
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .full-width {
-      grid-column: 1 / -1;
-    }
-
-    label {
-      font-weight: 600;
-      color: #111827;
-    }
-
-    input,
-    select {
-      height: 48px;
-      border: 1px solid #dbe3ef;
-      border-radius: 14px;
-      padding: 0 14px;
-      font-size: 15px;
-      background: #ffffff;
-      color: #111827;
-      outline: none;
-    }
-
-    input:focus,
-    select:focus {
-      border-color: #2563eb;
-      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
-    }
-
-    small {
-      color: #dc2626;
-      font-size: 13px;
-    }
-
-    .actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 12px;
-      margin-top: 28px;
-    }
-
-    .primary-button,
-    .secondary-button {
-      height: 44px;
-      padding: 0 18px;
-      border-radius: 12px;
-      border: none;
-      cursor: pointer;
-      font-weight: 600;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .primary-button {
-      background: linear-gradient(135deg, #2563eb, #1d4ed8);
-      color: white;
-    }
-
-    .primary-button:disabled {
-      opacity: 0.7;
-      cursor: not-allowed;
-    }
-
-    .secondary-button {
-      background: #eff6ff;
-      color: #1d4ed8;
-      border: 1px solid #bfdbfe;
-    }
-
-    .alert {
-      padding: 14px 16px;
-      border-radius: 14px;
-      margin-bottom: 20px;
-      font-weight: 500;
-    }
-
-    .success {
-      background: #ecfdf5;
-      color: #047857;
-      border: 1px solid #a7f3d0;
-    }
-
-    .error {
-      background: #fef2f2;
-      color: #b91c1c;
-      border: 1px solid #fecaca;
-    }
-
-    @media (max-width: 768px) {
-      .grid {
-        grid-template-columns: 1fr;
+  styles: [
+    `
+      .page {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
       }
 
       .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .page-header h1 {
+        margin: 0;
+        font-size: 28px;
+        color: #111827;
+      }
+
+      .page-header p {
+        margin: 8px 0 0;
+        color: #6b7280;
+      }
+
+      .form-card {
+        background: #ffffff;
+        border-radius: 24px;
+        padding: 28px;
+        border: 1px solid #eef2f7;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px;
+      }
+
+      .field {
+        display: flex;
         flex-direction: column;
-        align-items: flex-start;
+        gap: 8px;
+      }
+
+      .full-width {
+        grid-column: 1 / -1;
+      }
+
+      label {
+        font-weight: 600;
+        color: #111827;
+      }
+
+      input,
+      select {
+        height: 48px;
+        border: 1px solid #dbe3ef;
+        border-radius: 14px;
+        padding: 0 14px;
+        font-size: 15px;
+        background: #ffffff;
+        color: #111827;
+        outline: none;
+      }
+
+      input:focus,
+      select:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+      }
+
+      small {
+        color: #dc2626;
+        font-size: 13px;
       }
 
       .actions {
-        flex-direction: column;
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        margin-top: 28px;
       }
-    }
-  `]
+
+      .primary-button,
+      .secondary-button {
+        height: 44px;
+        padding: 0 18px;
+        border-radius: 12px;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .primary-button {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        color: white;
+      }
+
+      .primary-button:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+      }
+
+      .secondary-button {
+        background: #eff6ff;
+        color: #1d4ed8;
+        border: 1px solid #bfdbfe;
+      }
+
+      .alert {
+        padding: 14px 16px;
+        border-radius: 14px;
+        margin-bottom: 20px;
+        font-weight: 500;
+      }
+
+      .success {
+        background: #ecfdf5;
+        color: #047857;
+        border: 1px solid #a7f3d0;
+      }
+
+      .error {
+        background: #fef2f2;
+        color: #b91c1c;
+        border: 1px solid #fecaca;
+      }
+
+      @media (max-width: 768px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+
+        .page-header {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .actions {
+          flex-direction: column;
+        }
+      }
+    `,
+  ],
 })
 export class ProjectFormComponent implements OnInit {
   private fb = inject(FormBuilder);
@@ -253,7 +270,7 @@ export class ProjectFormComponent implements OnInit {
     dateDebut: ['', Validators.required],
     dateFin: ['', Validators.required],
     budget: [null as number | null, [Validators.required, Validators.min(1)]],
-    statut: ['Programmé', Validators.required]
+    statut: ['Programmé', Validators.required],
   });
 
   get f() {
@@ -299,14 +316,15 @@ export class ProjectFormComponent implements OnInit {
       dateDebut,
       dateFin,
       budget: Number(this.formulaire.value.budget),
-      statut: this.formulaire.value.statut as string
+      statut: this.formulaire.value.statut as string,
     };
 
     this.enregistrementEnCours = true;
 
-    const operation = this.modeEdition && this.projetId !== null
-      ? this.projectService.mettreAJourProjet(this.projetId, payload)
-      : this.projectService.creerProjet(payload);
+    const operation =
+      this.modeEdition && this.projetId !== null
+        ? this.projectService.mettreAJourProjet(this.projetId, payload)
+        : this.projectService.creerProjet(payload);
 
     operation.subscribe({
       next: () => {
@@ -327,7 +345,7 @@ export class ProjectFormComponent implements OnInit {
           error?.error?.message ||
           error?.error?.error ||
           `Erreur lors de ${this.modeEdition ? 'la mise à jour' : 'la création'} du projet.`;
-      }
+      },
     });
   }
 
@@ -339,7 +357,7 @@ export class ProjectFormComponent implements OnInit {
           dateDebut: projet.dateDebut,
           dateFin: projet.dateFin,
           budget: projet.budget ? Number(projet.budget) : null,
-          statut: projet.statut
+          statut: projet.statut,
         });
       },
       error: (error) => {
@@ -347,7 +365,7 @@ export class ProjectFormComponent implements OnInit {
           error?.error?.message ||
           error?.error?.error ||
           'Impossible de charger le projet à modifier.';
-      }
+      },
     });
   }
 }

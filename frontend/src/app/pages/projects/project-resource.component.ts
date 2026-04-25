@@ -27,9 +27,7 @@ import { ProjectService } from '../../services/project.services';
       <div class="card">
         <h2>Affecter des employés</h2>
 
-        <div *ngIf="employes.length === 0">
-          Aucun employé disponible.
-        </div>
+        <div *ngIf="employes.length === 0">Aucun employé disponible.</div>
 
         <div class="checkbox-list" *ngIf="employes.length > 0">
           <label *ngFor="let employe of employes" class="checkbox-item">
@@ -50,20 +48,79 @@ import { ProjectService } from '../../services/project.services';
       </div>
     </section>
   `,
-  styles: [`
-    .page { display: flex; flex-direction: column; gap: 24px; }
-    .page-header { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
-    .card { background: #fff; border-radius: 24px; padding: 24px; border: 1px solid #eef2f7; box-shadow: 0 10px 30px rgba(15,23,42,0.05); }
-    .checkbox-list { display: flex; flex-direction: column; gap: 14px; margin-top: 16px; }
-    .checkbox-item { display: flex; align-items: center; gap: 12px; }
-    .actions { margin-top: 24px; }
-    .primary-button, .secondary-button { height: 44px; padding: 0 18px; border-radius: 12px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; border: none; cursor: pointer; }
-    .primary-button { background: linear-gradient(135deg,#2563eb,#1d4ed8); color: white; }
-    .secondary-button { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
-    .alert { padding: 14px 16px; border-radius: 14px; font-weight: 500; }
-    .success { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
-    .error { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
-  `]
+  styles: [
+    `
+      .page {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+      }
+      .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+      }
+      .card {
+        background: #fff;
+        border-radius: 24px;
+        padding: 24px;
+        border: 1px solid #eef2f7;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+      }
+      .checkbox-list {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        margin-top: 16px;
+      }
+      .checkbox-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .actions {
+        margin-top: 24px;
+      }
+      .primary-button,
+      .secondary-button {
+        height: 44px;
+        padding: 0 18px;
+        border-radius: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        cursor: pointer;
+      }
+      .primary-button {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        color: white;
+      }
+      .secondary-button {
+        background: #eff6ff;
+        color: #1d4ed8;
+        border: 1px solid #bfdbfe;
+      }
+      .alert {
+        padding: 14px 16px;
+        border-radius: 14px;
+        font-weight: 500;
+      }
+      .success {
+        background: #ecfdf5;
+        color: #047857;
+        border: 1px solid #a7f3d0;
+      }
+      .error {
+        background: #fef2f2;
+        color: #b91c1c;
+        border: 1px solid #fecaca;
+      }
+    `,
+  ],
 })
 export class ProjectResourceComponent implements OnInit {
   private projectService = inject(ProjectService);
@@ -90,7 +147,7 @@ export class ProjectResourceComponent implements OnInit {
       },
       error: () => {
         this.messageErreur = 'Impossible de charger le projet.';
-      }
+      },
     });
 
     this.employeeService.chargerTousLesEmployes().subscribe({
@@ -99,7 +156,7 @@ export class ProjectResourceComponent implements OnInit {
       },
       error: () => {
         this.messageErreur = 'Impossible de charger les employés.';
-      }
+      },
     });
   }
 
@@ -131,7 +188,7 @@ export class ProjectResourceComponent implements OnInit {
       },
       error: () => {
         this.messageErreur = 'Impossible d’enregistrer les affectations.';
-      }
+      },
     });
   }
 }

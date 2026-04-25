@@ -7,7 +7,9 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "test:coverage": "ng test --no-watch --code-coverage",
+    "test:coverage": "ng test --no-watch --coverage --coverage-reporters=lcov",
+    "format": "prettier --write \"src/**/*.{ts,html,css}\" \"*.json\"",
+    "format:check": "prettier --check \"src/**/*.{ts,html,css}\" \"*.json\"",
     "serve:ssr:frontend": "node dist/frontend/server/server.mjs"
   },
   "private": true,
@@ -36,7 +38,7 @@
     "prettier": "^3.8.1",
     "typescript": "~5.9.2",
     "vitest": "^4.0.8",
-    "@vitest/coverage-v8": "^2.0.0",
-    "@vitest/ui": "^2.0.0"
+    "@vitest/coverage-v8": "^4.1.4",
+    "@vitest/ui": "^4.1.4"
   }
 }

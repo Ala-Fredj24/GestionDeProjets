@@ -1,4 +1,4 @@
-import { Employee } from "./employee.models";
+import { Employee } from './employee.models';
 
 export interface Project {
   id?: number;
@@ -7,7 +7,7 @@ export interface Project {
   dateFin: string;
   budget: number;
   statut: string;
-  employes?: Employee[];  
+  employes?: Employee[];
 }
 export interface ProjectPayload {
   nom: string;

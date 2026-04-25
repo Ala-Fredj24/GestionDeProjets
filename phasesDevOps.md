@@ -19,12 +19,12 @@ Ce fichier reflète l'état réel du repo actuel :
 | 7 | Stabilisation configuration locale | ✅ DONE | hist |
 | 8 | Conteneurisation complète | ✅ DONE | 1f2df6e |
 | 9 | CI GitHub Actions | ✅ DONE | TBD |
-| 10 | Quality gate & sécurité | 📋 TODO | - |
-| 11 | Déploiement Kubernetes | 📋 TODO | - |
-| 12 | Observabilité (logs + métriques) | 📋 TODO | - |
-| 13 | Finalisation & soutenance | 📋 TODO | - |
+| 10 | Quality gate & sécurité | ✅ DONE | TBD |
+| 11 | Déploiement Kubernetes | ✅ DONE | TBD |
+| 12 | Observabilité (logs + métriques) | ✅ DONE | TBD |
+| 13 | Finalisation & soutenance | ✅ DONE | TBD |
 
-**Avancement global :** 9/13 phases (69%) ✅
+**Avancement global :** 13/13 phases (100%) ✅
 
 ---
 
@@ -236,65 +236,122 @@ docker-compose ps                # Voir l'état des services
 
 ---
 
-## Phase 10 — Quality gate & sécurité pipeline [TODO]
+## Phase 10 — Quality gate & sécurité pipeline [DONE]
 
 **Objectif :** renforcer la CI avec contrôle qualité et sécurité.
 
-**Travaux :**
-- analyse qualité (ex: SonarCloud)
-- scan de dépendances Maven/npm
-- scan SAST (ex: CodeQL)
-- règles de blocage explicites sur vulnérabilités critiques
+**Travaux réalisés :**
+- ✅ créé `.github/workflows/quality-gate.yml`
+- ✅ analyse qualité backend SonarCloud avec attente explicite du Quality Gate
+- ✅ scan SAST GitHub CodeQL sur `java` et `javascript`
+- ✅ scan de dépendances Maven via OWASP Dependency-Check
+- ✅ scan npm audit sur les dépendances de production frontend
+- ✅ génération SBOM backend/frontend pour traçabilité
+- ✅ règles de blocage explicites sur vulnérabilités critiques
+- ✅ rapport de phase ajouté dans `PHASE_10_REPORT.md`
 
-**Définition of done :**
-- les checks qualité/sécurité requis sont obligatoires avant merge vers `dev`
+**Définition of done ✅ :**
+- ✅ les checks qualité/sécurité requis sont obligatoires avant merge vers `dev`
+- ✅ SonarCloud bloque si le Quality Gate échoue
+- ✅ CodeQL publie les alertes SAST dans GitHub Security
+- ✅ les vulnérabilités critiques bloquent explicitement le merge (`CVSS >= 9.0` côté Maven, `critical` côté npm)
+
+**Fichiers créés :**
+- `.github/workflows/quality-gate.yml`
+- `PHASE_10_REPORT.md`
 
 **Branch git proposée :** `feat/devops-quality-security-gate`
 
 ---
 
-## Phase 11 — Déploiement local orchestré (Kubernetes optionnel) [TODO]
+## Phase 11 — Déploiement local orchestré (Kubernetes optionnel) [DONE]
 
 **Objectif :** préparer un mode de déploiement démontrable pour la soutenance.
 
-**Approche recommandée :**
-1. finaliser d'abord Docker Compose complet (phase 8)
-2. ensuite ajouter des manifests Kubernetes locaux si nécessaire (`k8s/`)
+**Travaux réalisés :**
+- ✅ créé le dossier `k8s/` pour le déploiement local orchestré
+- ✅ ajouté un namespace Kubernetes dédié
+- ✅ séparé la configuration via `ConfigMap` et `Secret`
+- ✅ ajouté la persistance MySQL avec `PersistentVolumeClaim`
+- ✅ créé les manifests `mysql`, `backend`, `frontend` et `phpmyadmin`
+- ✅ documenté le scénario de déploiement local dans `k8s/README.md`
+- ✅ ajouté un rapport de phase dans `PHASE_11_REPORT.md`
 
-**Définition of done :**
-- un guide reproductible permet de déployer la stack localement de bout en bout
+**Définition of done ✅ :**
+- ✅ un guide reproductible permet de déployer la stack localement de bout en bout
+- ✅ la stack complète est déployable sur un cluster Kubernetes local
+- ✅ le scénario de démonstration couvre frontend, backend, base de données et phpMyAdmin
+
+**Fichiers créés :**
+- `k8s/namespace.yaml`
+- `k8s/configmap.yaml`
+- `k8s/secret.yaml`
+- `k8s/mysql.yaml`
+- `k8s/backend.yaml`
+- `k8s/frontend.yaml`
+- `k8s/phpmyadmin.yaml`
+- `k8s/README.md`
+- `PHASE_11_REPORT.md`
 
 **Branch git proposée :** `feat/devops-deploiement-local-orchestre`
 
 ---
 
-## Phase 12 — Observabilité (logs + métriques) [TODO]
+## Phase 12 — Observabilité (logs + métriques) [DONE]
 
 **Objectif :** rendre le diagnostic opérationnel (application + infra).
 
-**Travaux :**
-- standardiser les logs backend (niveaux, contexte, erreurs)
-- exposer des métriques backend (Actuator / Prometheus)
-- tableau de bord de base (Grafana) pour la démo
+**Travaux réalisés :**
+- ✅ standardisé les logs backend avec `logback-spring.xml`
+- ✅ ajouté un `requestId` par requête via `RequestCorrelationFilter`
+- ✅ exposé les métriques backend via Spring Boot Actuator + Prometheus
+- ✅ ouvert les endpoints d'observabilité requis dans `SecurityConfig`
+- ✅ ajouté `prometheus` et `grafana` à `docker-compose.yml`
+- ✅ provisionné Grafana automatiquement avec source de données et dashboard
+- ✅ documenté la phase dans `PHASE_12_REPORT.md`
 
-**Définition of done :**
-- incidents courants identifiables rapidement via logs et dashboards
+**Définition of done ✅ :**
+- ✅ incidents courants identifiables rapidement via logs et dashboards
+- ✅ métriques backend consultables via `/api/actuator/prometheus`
+- ✅ tableau de bord Grafana prêt pour la démo locale
+
+**Fichiers créés :**
+- `backend/src/main/java/com/projetjee/backend/config/RequestCorrelationFilter.java`
+- `backend/src/main/resources/logback-spring.xml`
+- `observability/prometheus/prometheus.yml`
+- `observability/grafana/provisioning/datasources/prometheus.yml`
+- `observability/grafana/provisioning/dashboards/dashboard.yml`
+- `observability/grafana/dashboards/gestionprojets-overview.json`
+- `PHASE_12_REPORT.md`
 
 **Branch git proposée :** `feat/devops-observabilite-logs-metrics`
 
 ---
 
-## Phase 13 — Finalisation et soutenance [TODO]
+## Phase 13 — Finalisation et soutenance [DONE]
 
 **Objectif :** figer une version stable et présentable.
 
-**Travaux :**
-- nettoyage documentation (README racine + backend + frontend)
-- script/scénario de démonstration reproductible
-- vérification finale cohérence code/config/docs
+**Travaux réalisés :**
+- ✅ ajouté un `README.md` racine
+- ✅ ajouté un `backend/README.md`
+- ✅ mis à jour `frontend/README.md`
+- ✅ ajouté un scénario de démonstration reproductible dans `DEMO.md`
+- ✅ ajouté un script `scripts/demo-start.sh`
+- ✅ vérifié la cohérence entre code, configuration et documentation
+- ✅ ajouté un rapport de phase dans `PHASE_13_REPORT.md`
 
-**Définition of done :**
-- projet livrable, démontrable et aligné avec l'implémentation réelle
+**Définition of done ✅ :**
+- ✅ projet livrable, démontrable et aligné avec l'implémentation réelle
+- ✅ documentation d'entrée disponible pour backend, frontend et projet global
+- ✅ scénario de soutenance réutilisable sans préparation supplémentaire
+
+**Fichiers créés :**
+- `README.md`
+- `backend/README.md`
+- `DEMO.md`
+- `scripts/demo-start.sh`
+- `PHASE_13_REPORT.md`
 
 **Branch git proposée :** `chore/finalisation-livrable-soutenance`
 

@@ -57,13 +57,14 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD:-apppass}
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILE:-docker}
+      APP_JWT_SECRET: ${APP_JWT_SECRET:-Q2VjaUVzdFVuU2VjcmV0SldUU3VwZXJMb25nUG91ckphdmExN1NwcmluZ0Jvb3Q0MjAyNg==}
       SERVER_PORT: 8085
     ports:
       - "${BACKEND_PORT:-8085}:8085"
     volumes:
       - ./backend:/app
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8085/api/projets"]
+      test: ["CMD", "curl", "-f", "http://localhost:8085/actuator/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -90,6 +91,38 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
+    networks:
+      - gestion-network
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: gestionprojet-prometheus
+    restart: unless-stopped
+    depends_on:
+      - backend
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+    volumes:
+      - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    networks:
+      - gestion-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: gestionprojet-grafana
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./observability/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    ports:
+      - "3000:3000"
     networks:
       - gestion-network
 

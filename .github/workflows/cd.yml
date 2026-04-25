@@ -1,0 +1,487 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# CD — Publish & GitOps update (builds sélectifs)
+#
+# Gouvernance Phase 22.1 :
+#   - un push sur main déclenche CI, Security et CD en parallèle
+#   - CD N'A PAS le droit de publier quoi que ce soit immédiatement
+#   - le premier job de ce workflow attend explicitement la fin de CI ET Security
+#   - publication + modification GitOps ne démarrent que si les deux workflows
+#     sont terminés avec succès pour le MÊME commit de main
+#
+# Cela couvre les deux cas métier visés :
+#   1. push direct administrateur sur main
+#   2. merge d'une PR vers main
+#
+# Phase 22.3 remplace ensuite le push GitOps direct sur main par une PR GitOps
+# creee avec GITHUB_TOKEN. ArgoCD ne synchronise donc qu'apres merge de cette PR.
+# ══════════════════════════════════════════════════════════════════════════════
+
+name: CD — Publish & GitOps update
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: cd-main-${{ github.sha }}
+  cancel-in-progress: false
+
+# ── Job 1 : Attendre explicitement CI et Security ─────────────────────────────
+#
+# Le workflow CD est déclenché dès le push sur main, mais ce job bloque toute
+# la suite tant que les deux workflows de validation attendus ne sont pas
+# terminés sur le SHA courant.
+#   - conclusion "success"  -> on laisse passer
+#   - conclusion "failure"  -> on échoue explicitement
+#   - run manquant/pending   -> on continue d'attendre dans la limite définie
+#
+# Cette attente explicite supprime le trou de gouvernance où un CD pourrait
+# partir sur un commit main encore non validé.
+# ──────────────────────────────────────────────────────────────────────────────
+jobs:
+  wait-for-main-validations:
+    name: Attendre CI et Security sur ce commit main
+    runs-on: ubuntu-latest
+
+    if: >-
+      !contains(github.event.head_commit.message, '[skip ci]') &&
+      !startsWith(github.event.head_commit.message, 'chore(gitops):')
+
+    permissions:
+      actions: read
+      contents: read
+
+    outputs:
+      backend: ${{ steps.paths.outputs.backend }}
+      frontend: ${{ steps.paths.outputs.frontend }}
+      tag: ${{ steps.version.outputs.tag }}
+      owner_lc: ${{ steps.version.outputs.owner_lc }}
+
+    steps:
+      - name: Attendre les workflows requis
+        uses: actions/github-script@v7
+        env:
+          REQUIRED_WORKFLOWS: '["CI","Security"]'
+          POLL_INTERVAL_MS: "15000"
+          MAX_WAIT_MINUTES: "45"
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const branch = 'main';
+            const headSha = context.sha;
+            const requiredWorkflows = JSON.parse(process.env.REQUIRED_WORKFLOWS);
+            const pollIntervalMs = Number(process.env.POLL_INTERVAL_MS);
+            const deadline = Date.now() + Number(process.env.MAX_WAIT_MINUTES) * 60 * 1000;
+
+            const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+            while (Date.now() < deadline) {
+              const runsByWorkflow = new Map();
+
+              for (const workflowName of requiredWorkflows) {
+                const response = await github.rest.actions.listWorkflowRunsForRepo({
+                  owner,
+                  repo,
+                  branch,
+                  event: 'push',
+                  head_sha: headSha,
+                  per_page: 100
+                });
+
+                const run = response.data.workflow_runs.find(
+                  (candidate) => candidate.name === workflowName
+                );
+
+                runsByWorkflow.set(workflowName, run ?? null);
+              }
+
+              const missingWorkflows = requiredWorkflows.filter(
+                (workflowName) => !runsByWorkflow.get(workflowName)
+              );
+
+              if (missingWorkflows.length > 0) {
+                core.info(
+                  `Workflows encore introuvables pour ${headSha}: ${missingWorkflows.join(', ')}. Nouvelle vérification dans ${pollIntervalMs / 1000}s.`
+                );
+                await sleep(pollIntervalMs);
+                continue;
+              }
+
+              const pendingWorkflows = requiredWorkflows.filter((workflowName) => {
+                const run = runsByWorkflow.get(workflowName);
+                return run.status !== 'completed';
+              });
+
+              if (pendingWorkflows.length > 0) {
+                core.info(
+                  `Workflows encore en cours pour ${headSha}: ${pendingWorkflows.join(', ')}. Nouvelle vérification dans ${pollIntervalMs / 1000}s.`
+                );
+                await sleep(pollIntervalMs);
+                continue;
+              }
+
+              const failedWorkflows = requiredWorkflows.filter((workflowName) => {
+                const run = runsByWorkflow.get(workflowName);
+                return run.conclusion !== 'success';
+              });
+
+              if (failedWorkflows.length > 0) {
+                for (const workflowName of failedWorkflows) {
+                  const run = runsByWorkflow.get(workflowName);
+                  core.error(
+                    `${workflowName} est terminé avec la conclusion "${run.conclusion}" sur ${headSha}.`
+                  );
+                }
+                core.setFailed(
+                  `CD bloqué : CI et Security doivent être verts sur main avant toute publication.`
+                );
+                return;
+              }
+
+              core.info(`CI et Security sont verts pour ${headSha}. Le CD peut continuer.`);
+              return;
+            }
+
+            core.setFailed(
+              `Timeout atteint en attendant CI et Security sur ${headSha}.`
+            );
+
+      - name: Checkout — commit validé avec parent pour git diff
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Calculer le tag d'image (sha-<7 chars>)
+        id: version
+        run: |
+          SHORT_SHA=$(echo "${GITHUB_SHA}" | cut -c1-7)
+          OWNER_LC=$(echo "${GITHUB_REPOSITORY_OWNER}" | tr '[:upper:]' '[:lower:]')
+          echo "tag=sha-${SHORT_SHA}" >> "$GITHUB_OUTPUT"
+          echo "owner_lc=${OWNER_LC}" >> "$GITHUB_OUTPUT"
+          echo "Tag calcule : sha-${SHORT_SHA}"
+          echo "Owner GHCR : ${OWNER_LC}"
+
+      - name: Détecter les chemins modifiés (backend/ et frontend/)
+        id: paths
+        run: |
+          CHANGED=$(git diff --name-only HEAD~1 HEAD)
+
+          echo "Fichiers modifies dans ce commit :"
+          echo "${CHANGED}"
+          echo "---"
+
+          if echo "${CHANGED}" | grep -q "^backend/"; then
+            echo "backend=true"  >> "$GITHUB_OUTPUT"
+            echo "-> backend/ modifie  : build backend active."
+          else
+            echo "backend=false" >> "$GITHUB_OUTPUT"
+            echo "-> backend/ inchange : build backend ignore."
+          fi
+
+          if echo "${CHANGED}" | grep -q "^frontend/"; then
+            echo "frontend=true"  >> "$GITHUB_OUTPUT"
+            echo "-> frontend/ modifie  : build frontend active."
+          else
+            echo "frontend=false" >> "$GITHUB_OUTPUT"
+            echo "-> frontend/ inchange : build frontend ignore."
+          fi
+
+  # ── Job 2 : Détecter les changements ──────────────────────────────────────────
+  #
+  # Les outputs calculés après validation explicite sont transmis aux jobs de
+  # build. On garde la stratégie de builds sélectifs introduite plus tôt.
+  # ──────────────────────────────────────────────────────────────────────────────
+  detect-changes:
+    name: Détecter les fichiers modifiés et calculer le tag
+    needs: wait-for-main-validations
+    runs-on: ubuntu-latest
+
+    outputs:
+      backend: ${{ needs.wait-for-main-validations.outputs.backend }}
+      frontend: ${{ needs.wait-for-main-validations.outputs.frontend }}
+      tag: ${{ needs.wait-for-main-validations.outputs.tag }}
+      owner_lc: ${{ needs.wait-for-main-validations.outputs.owner_lc }}
+
+    steps:
+      - name: Rappeler les resultats de validation
+        run: |
+          echo "CI et Security valides pour ${GITHUB_SHA}."
+          echo "backend=${{ needs.wait-for-main-validations.outputs.backend }}"
+          echo "frontend=${{ needs.wait-for-main-validations.outputs.frontend }}"
+          echo "tag=${{ needs.wait-for-main-validations.outputs.tag }}"
+          echo "owner_lc=${{ needs.wait-for-main-validations.outputs.owner_lc }}"
+
+  # ── Job 2 : Construire et publier l'image backend ─────────────────────────────
+  #
+  # Ne s'exécute QUE si detect-changes a détecté au moins un fichier modifié
+  # sous backend/. Sinon, ce job est ignoré (status "skipped") sans erreur.
+  # ──────────────────────────────────────────────────────────────────────────────
+  build-backend:
+    name: Build & push — backend
+    needs: detect-changes
+    runs-on: ubuntu-latest
+
+    # Condition : lire l'output "backend" du job detect-changes.
+    # Si "false" (dossier backend inchangé), ce job est ignoré entièrement.
+    if: needs.detect-changes.outputs.backend == 'true'
+
+    permissions:
+      # Écriture dans GHCR nécessaire pour `docker push`.
+      packages: write
+
+    steps:
+      - name: Checkout — commit testé par CI
+        uses: actions/checkout@v4
+        with:
+          # On construit exactement le commit main validé par CI + Security.
+          ref: ${{ github.sha }}
+
+      - name: Se connecter à GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          # GITHUB_TOKEN est automatiquement fourni ; le droit "packages: write"
+          # ci-dessus lui permet de pousser sur GHCR sans secret supplémentaire.
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configurer Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        # Buildx active le cache de couches Docker (cache-from/cache-to).
+        # Les dépendances Maven non modifiées ne sont pas retéléchargées.
+
+      - name: Construire et pousser l'image backend
+        uses: docker/build-push-action@v6
+        with:
+          # Dockerfile backend multi-stage (phase 13) :
+          #   stage 1 — mvn package sur JDK 17
+          #   stage 2 — runtime Eclipse Temurin JRE 17 allégé
+          context: ./backend
+          push: true
+          # Un seul tag SHA — immuable et traçable.
+          # ArgoCD référence ce tag précis dans kustomization.yaml.
+          # Pas de tag "latest" : il serait muable et masquerait quelle version est réellement déployée.
+          tags: ghcr.io/${{ needs.detect-changes.outputs.owner_lc }}/gestiondeprojets-backend:${{ needs.detect-changes.outputs.tag }}
+          # Le cache GHA évite de reconstruire les couches inchangées
+          # (ex : couche des dépendances Maven si pom.xml n'a pas bougé).
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ── Job 3 : Construire et publier l'image frontend ────────────────────────────
+  #
+  # Symétrique à build-backend. S'exécute en parallèle si les deux dossiers
+  # ont changé simultanément (backend et frontend dans le même commit).
+  # ──────────────────────────────────────────────────────────────────────────────
+  build-frontend:
+    name: Build & push — frontend
+    needs: detect-changes
+    runs-on: ubuntu-latest
+
+    # Condition : lire l'output "frontend" du job detect-changes.
+    if: needs.detect-changes.outputs.frontend == 'true'
+
+    permissions:
+      packages: write
+
+    steps:
+      - name: Checkout — commit testé par CI
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Se connecter à GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configurer Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Construire et pousser l'image frontend
+        uses: docker/build-push-action@v6
+        with:
+          # Dockerfile frontend multi-stage (phase 13) :
+          #   stage 1 — ng build --configuration production sur Node 20
+          #   stage 2 — nginx:alpine servant les fichiers statiques compilés
+          context: ./frontend
+          push: true
+          # Même principe : tag SHA uniquement.
+          tags: ghcr.io/${{ needs.detect-changes.outputs.owner_lc }}/gestiondeprojets-frontend:${{ needs.detect-changes.outputs.tag }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ── Job 4 : Ouvrir une PR GitOps apres publication des images ─────────────────
+  #
+  # Ce job attend la fin de build-backend ET build-frontend (qu'ils aient réussi
+  # ou été ignorés). Il ne s'exécute que si au moins un build a réussi.
+  #
+  # Il met à jour UNIQUEMENT les tags des images effectivement reconstruites.
+  # Si seul le backend a changé, seul le tag backend est modifié dans
+  # kustomization.yaml ; le tag frontend reste à sa valeur précédente.
+  #
+  # Le changement GitOps n'est plus pousse directement sur main.
+  # Le workflow :
+  #   1. cree une branche gitops/bump-images-sha-xxxxxxx
+  #   2. committe la mise a jour de kustomization.yaml sur cette branche
+  #   3. ouvre (ou met a jour) une PR vers main
+  #   4. active l'auto-merge en squash sur cette PR
+  #
+  # ArgoCD ne verra donc le nouveau tag qu'apres merge de la PR GitOps.
+  # ──────────────────────────────────────────────────────────────────────────────
+  gitops-bump:
+    name: Créer la PR GitOps
+    needs: [detect-changes, build-backend, build-frontend]
+    runs-on: ubuntu-latest
+
+    # always() : ce job s'exécute même si build-backend ou build-frontend
+    # a été ignoré (status "skipped"). Sans always(), un job skipped en amont
+    # rendrait ce job skipped aussi, même si l'autre build a réussi.
+    #
+    # La condition vérifie ensuite qu'au moins un build a produit une image :
+    #   - needs.build-backend.result  == 'success' : backend reconstruit ✓
+    #   - needs.build-frontend.result == 'success' : frontend reconstruit ✓
+    # Si les deux sont "skipped" (aucun dossier modifié), ce job est ignoré.
+    if: >-
+      always() &&
+      (needs.build-backend.result == 'success' ||
+       needs.build-frontend.result == 'success')
+
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout — historique complet pour la branche GitOps
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - name: Installer kustomize
+        run: |
+          KUSTOMIZE_VERSION="v5.4.3"
+          curl -sLo /tmp/kustomize.tar.gz \
+            "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2F${KUSTOMIZE_VERSION}/kustomize_${KUSTOMIZE_VERSION}_linux_amd64.tar.gz"
+          tar -xzf /tmp/kustomize.tar.gz -C /tmp
+          sudo mv /tmp/kustomize /usr/local/bin/kustomize
+          kustomize version
+
+      - name: Mettre à jour kustomization.yaml sur une branche GitOps
+        id: prepare-gitops-pr
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          TAG="${{ needs.detect-changes.outputs.tag }}"
+          OWNER_LC="${{ needs.detect-changes.outputs.owner_lc }}"
+          APP_COMMIT_SHA="${{ github.sha }}"
+          APP_COMMIT_SHORT="${APP_COMMIT_SHA::7}"
+          BRANCH_NAME="gitops/bump-images-${TAG}"
+
+          git fetch origin main
+          git checkout main
+          git pull --rebase origin main
+          git switch -C "${BRANCH_NAME}"
+
+          cd k8s/overlays/gitops
+
+          UPDATED_IMAGES_FILE="/tmp/gitops-updated-images.txt"
+          : > "${UPDATED_IMAGES_FILE}"
+
+          if [ "${{ needs.build-backend.result }}" == "success" ]; then
+            kustomize edit set image \
+              "gestiondeprojets-backend=ghcr.io/${OWNER_LC}/gestiondeprojets-backend:${TAG}"
+            printf '%s\n' \
+              "- backend -> ghcr.io/${OWNER_LC}/gestiondeprojets-backend:${TAG}" \
+              >> "${UPDATED_IMAGES_FILE}"
+            echo "Tag backend mis a jour : ${TAG}"
+          else
+            echo "Build backend ignore ou echoue - tag backend inchange."
+          fi
+
+          if [ "${{ needs.build-frontend.result }}" == "success" ]; then
+            kustomize edit set image \
+              "gestiondeprojets-frontend=ghcr.io/${OWNER_LC}/gestiondeprojets-frontend:${TAG}"
+            printf '%s\n' \
+              "- frontend -> ghcr.io/${OWNER_LC}/gestiondeprojets-frontend:${TAG}" \
+              >> "${UPDATED_IMAGES_FILE}"
+            echo "Tag frontend mis a jour : ${TAG}"
+          else
+            echo "Build frontend ignore ou echoue - tag frontend inchange."
+          fi
+
+          cd ../../..
+
+          git add k8s/overlays/gitops/kustomization.yaml
+
+          if git diff --cached --quiet; then
+            echo "Aucun changement de tag detecte. PR GitOps ignoree."
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          PR_TITLE="chore(gitops): bump images to ${TAG}"
+
+          cat <<EOF > /tmp/gitops-pr-body.md
+          ## GitOps image bump
+
+          Images mises a jour :
+          $(cat "${UPDATED_IMAGES_FILE}")
+          Tags publies :
+          - ${TAG}
+
+          Commit applicatif declencheur :
+          - ${APP_COMMIT_SHA}
+          - commit court : ${APP_COMMIT_SHORT}
+          EOF
+
+          git commit -m "${PR_TITLE}"
+          git push --force-with-lease origin "${BRANCH_NAME}"
+
+          echo "has_changes=true" >> "$GITHUB_OUTPUT"
+          echo "branch_name=${BRANCH_NAME}" >> "$GITHUB_OUTPUT"
+          echo "pr_title=${PR_TITLE}" >> "$GITHUB_OUTPUT"
+          {
+            echo "pr_body_path=/tmp/gitops-pr-body.md"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Créer ou mettre à jour la PR GitOps
+        if: steps.prepare-gitops-pr.outputs.has_changes == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH_NAME: ${{ steps.prepare-gitops-pr.outputs.branch_name }}
+          PR_TITLE: ${{ steps.prepare-gitops-pr.outputs.pr_title }}
+          PR_BODY_PATH: ${{ steps.prepare-gitops-pr.outputs.pr_body_path }}
+        run: |
+          PR_NUMBER="$(gh pr list --head "${BRANCH_NAME}" --base main --json number --jq '.[0].number')"
+          if [ "${PR_NUMBER}" = "null" ]; then
+            PR_NUMBER=""
+          fi
+
+          if [ -n "${PR_NUMBER}" ]; then
+            gh pr edit "${PR_NUMBER}" \
+              --title "${PR_TITLE}" \
+              --body-file "${PR_BODY_PATH}"
+            echo "PR GitOps mise a jour : #${PR_NUMBER}"
+          else
+            gh pr create \
+              --base main \
+              --head "${BRANCH_NAME}" \
+              --title "${PR_TITLE}" \
+              --body-file "${PR_BODY_PATH}"
+            PR_NUMBER="$(gh pr list --head "${BRANCH_NAME}" --base main --json number --jq '.[0].number')"
+            echo "PR GitOps creee : #${PR_NUMBER}"
+          fi
+
+          echo "PR_NUMBER=${PR_NUMBER}" >> "$GITHUB_ENV"
+
+      - name: Activer l'auto-merge GitHub sur la PR GitOps
+        if: steps.prepare-gitops-pr.outputs.has_changes == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr merge "${PR_NUMBER}" --auto --squash --delete-branch

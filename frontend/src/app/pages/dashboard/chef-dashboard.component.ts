@@ -42,9 +42,7 @@ import { ProjectService } from '../../services/project.services';
         </div>
       </div>
 
-      <div *ngIf="chargement()" class="loading-card">
-        Chargement de vos projets...
-      </div>
+      <div *ngIf="chargement()" class="loading-card">Chargement de vos projets...</div>
 
       <div *ngIf="!chargement() && projets().length === 0" class="empty-state">
         Aucun projet visible pour ce chef de projet.
@@ -69,7 +67,7 @@ import { ProjectService } from '../../services/project.services';
               <td>{{ projet.nom }}</td>
               <td>{{ projet.dateDebut }}</td>
               <td>{{ projet.dateFin }}</td>
-              <td>{{ projet.budget | number:'1.2-2' }}</td>
+              <td>{{ projet.budget | number: '1.2-2' }}</td>
               <td>{{ projet.statut }}</td>
               <td>{{ projet.employes?.length || 0 }}</td>
             </tr>
@@ -78,95 +76,98 @@ import { ProjectService } from '../../services/project.services';
       </div>
     </section>
   `,
-  styles: [`
-    .page {
-      display: flex;
-      flex-direction: column;
-      gap: 24px;
-    }
-
-    .page-header h1 {
-      margin: 0;
-      font-size: 28px;
-      color: #111827;
-    }
-
-    .page-header p {
-      margin: 8px 0 0;
-      color: #6b7280;
-    }
-
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 20px;
-    }
-
-    .card,
-    .table-card,
-    .loading-card,
-    .empty-state {
-      background: #ffffff;
-      border-radius: 24px;
-      padding: 24px;
-      border: 1px solid #eef2f7;
-      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
-    }
-
-    .card span {
-      display: block;
-      color: #64748b;
-      margin-bottom: 10px;
-      font-size: 14px;
-    }
-
-    .card h3 {
-      margin: 0;
-      font-size: 28px;
-      color: #111827;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    th, td {
-      padding: 16px;
-      text-align: left;
-      border-bottom: 1px solid #eef2f7;
-    }
-
-    th {
-      font-size: 13px;
-      text-transform: uppercase;
-      color: #64748b;
-    }
-
-    .alert {
-      padding: 14px 16px;
-      border-radius: 14px;
-      font-weight: 500;
-    }
-
-    .error {
-      background: #fef2f2;
-      color: #b91c1c;
-      border: 1px solid #fecaca;
-    }
-
-    @media (max-width: 992px) {
-      .cards {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+  styles: [
+    `
+      .page {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
       }
-    }
 
-    @media (max-width: 768px) {
-      .cards {
-        grid-template-columns: 1fr;
+      .page-header h1 {
+        margin: 0;
+        font-size: 28px;
+        color: #111827;
       }
-    }
-  `]
+
+      .page-header p {
+        margin: 8px 0 0;
+        color: #6b7280;
+      }
+
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 20px;
+      }
+
+      .card,
+      .table-card,
+      .loading-card,
+      .empty-state {
+        background: #ffffff;
+        border-radius: 24px;
+        padding: 24px;
+        border: 1px solid #eef2f7;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+      }
+
+      .card span {
+        display: block;
+        color: #64748b;
+        margin-bottom: 10px;
+        font-size: 14px;
+      }
+
+      .card h3 {
+        margin: 0;
+        font-size: 28px;
+        color: #111827;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th,
+      td {
+        padding: 16px;
+        text-align: left;
+        border-bottom: 1px solid #eef2f7;
+      }
+
+      th {
+        font-size: 13px;
+        text-transform: uppercase;
+        color: #64748b;
+      }
+
+      .alert {
+        padding: 14px 16px;
+        border-radius: 14px;
+        font-weight: 500;
+      }
+
+      .error {
+        background: #fef2f2;
+        color: #b91c1c;
+        border: 1px solid #fecaca;
+      }
+
+      @media (max-width: 992px) {
+        .cards {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 768px) {
+        .cards {
+          grid-template-columns: 1fr;
+        }
+      }
+    `,
+  ],
 })
 export class ChefDashboardComponent implements OnInit {
   private projectService = inject(ProjectService);
@@ -176,9 +177,15 @@ export class ChefDashboardComponent implements OnInit {
   readonly messageErreur = signal('');
 
   readonly totalProjets = computed(() => this.projets().length);
-  readonly totalEnCours = computed(() => this.projets().filter(p => p.statut === 'En_Cours').length);
-  readonly totalProgrammes = computed(() => this.projets().filter(p => p.statut === 'Programmé').length);
-  readonly totalCompletes = computed(() => this.projets().filter(p => p.statut === 'Completé').length);
+  readonly totalEnCours = computed(
+    () => this.projets().filter((p) => p.statut === 'En_Cours').length,
+  );
+  readonly totalProgrammes = computed(
+    () => this.projets().filter((p) => p.statut === 'Programmé').length,
+  );
+  readonly totalCompletes = computed(
+    () => this.projets().filter((p) => p.statut === 'Completé').length,
+  );
 
   ngOnInit(): void {
     this.projectService.chargerMesProjetsChef().subscribe({
@@ -189,7 +196,7 @@ export class ChefDashboardComponent implements OnInit {
       error: () => {
         this.messageErreur.set('Impossible de charger les projets du chef.');
         this.chargement.set(false);
-      }
+      },
     });
   }
 }
