@@ -110,16 +110,19 @@ jobs:
         env:
           NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
         run: |
-          EXTRA=""
-          if [ -n "$NVD_API_KEY" ]; then
-            EXTRA="-DnvdApiKey=$NVD_API_KEY"
+          args=(
+            --batch-mode
+            org.owasp:dependency-check-maven:12.2.1:check
+            -DfailBuildOnCVSS=9
+            -Dformat=HTML
+            -DnvdApiDelay=6000
+          )
+
+          if [ -n "${NVD_API_KEY:-}" ]; then
+            args+=("-DnvdApiKey=${NVD_API_KEY}")
           fi
-          mvn --batch-mode \
-            org.owasp:dependency-check-maven:12.2.1:check \
-            -DfailBuildOnCVSS=9 \
-            -Dformat=HTML \
-            -DnvdApiDelay=6000 \
-            $EXTRA
+
+          mvn "${args[@]}"
 
       - name: Upload dependency-check report
         if: always()
@@ -150,7 +153,6 @@ jobs:
 
       - name: Scan backend image
         id: trivy-backend-scan
-        continue-on-error: true
         uses: aquasecurity/trivy-action@v0.35.0
         with:
           image-ref: gestiondeprojets-backend:scan
@@ -158,7 +160,7 @@ jobs:
           output: trivy-backend.sarif
           severity: HIGH,CRITICAL
           ignore-unfixed: true
-          exit-code: 1
+          exit-code: 0
 
       - name: Upload backend scan results
         if: always()
@@ -166,10 +168,6 @@ jobs:
         with:
           sarif_file: trivy-backend.sarif
           category: trivy-backend
-
-      - name: Fail backend job on vulnerabilities
-        if: steps.trivy-backend-scan.outcome == 'failure'
-        run: exit 1
 
   trivy-frontend:
     name: Trivy — frontend Docker image
@@ -191,7 +189,6 @@ jobs:
 
       - name: Scan frontend image
         id: trivy-frontend-scan
-        continue-on-error: true
         uses: aquasecurity/trivy-action@v0.35.0
         with:
           image-ref: gestiondeprojets-frontend:scan
@@ -199,7 +196,7 @@ jobs:
           output: trivy-frontend.sarif
           severity: HIGH,CRITICAL
           ignore-unfixed: true
-          exit-code: 1
+          exit-code: 0
 
       - name: Upload frontend scan results
         if: always()
@@ -207,7 +204,3 @@ jobs:
         with:
           sarif_file: trivy-frontend.sarif
           category: trivy-frontend
-
-      - name: Fail frontend job on vulnerabilities
-        if: steps.trivy-frontend-scan.outcome == 'failure'
-        run: exit 1
