@@ -50,7 +50,7 @@ images:
   newTag: sha-c1be34f
 - name: gestiondeprojets-frontend
   newName: ghcr.io/ala-fredj24/gestiondeprojets-frontend
-  newTag: sha-c1be34f
+  newTag: sha-b830ef4
 
 patches:
 - path: patches/expose-services.yaml
