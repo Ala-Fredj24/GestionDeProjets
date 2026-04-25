@@ -29,8 +29,8 @@ kind: Kustomization
 namespace: gestiondeprojets
 
 resources:
-  - ../../base
-  - ../../base/monitoring
+- ../../base
+- ../../base/monitoring
 
 # Pas de secretGenerator ici.
 # Le Secret gestiondeprojets-secrets est un "bootstrap secret" créé manuellement.
@@ -45,12 +45,12 @@ resources:
 # Champ "newTag"  : tag SHA calculé par le pipeline (ex : sha-a1b2c3d).
 #                   Valeur initiale "sha-placeholder" avant le premier run CD.
 images:
-  - name: gestiondeprojets-backend
-    newName: ghcr.io/ala-fredj24/gestiondeprojets-backend
-    newTag: sha-placeholder
-  - name: gestiondeprojets-frontend
-    newName: ghcr.io/ala-fredj24/gestiondeprojets-frontend
-    newTag: sha-placeholder
+- name: gestiondeprojets-backend
+  newName: ghcr.io/ala-fredj24/gestiondeprojets-backend
+  newTag: sha-c1be34f
+- name: gestiondeprojets-frontend
+  newName: ghcr.io/ala-fredj24/gestiondeprojets-frontend
+  newTag: sha-c1be34f
 
 patches:
-  - path: patches/expose-services.yaml
+- path: patches/expose-services.yaml
