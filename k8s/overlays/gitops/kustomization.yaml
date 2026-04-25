@@ -47,7 +47,7 @@ resources:
 images:
 - name: gestiondeprojets-backend
   newName: ghcr.io/ala-fredj24/gestiondeprojets-backend
-  newTag: sha-c1be34f
+  newTag: sha-5e68d9a
 - name: gestiondeprojets-frontend
   newName: ghcr.io/ala-fredj24/gestiondeprojets-frontend
   newTag: sha-b830ef4
