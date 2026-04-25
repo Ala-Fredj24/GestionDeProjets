@@ -276,3 +276,12 @@ Grafana login:
 
 - username: `admin`
 - password: `admin`
+
+The dashboard `GestionDeProjets Overview` is provisioned automatically on
+Grafana startup from:
+
+```text
+k8s/base/monitoring/grafana/dashboards/gestiondeprojets-overview.json
+```
+
+In the Grafana UI, open Dashboards -> GestionDeProjets -> GestionDeProjets Overview.
