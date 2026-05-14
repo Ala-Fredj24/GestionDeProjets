@@ -9,11 +9,16 @@ public class RapportFinancierProjetDto {
     private BigDecimal budgetProjet;
     private BigDecimal coutPrevuTotal;
     private BigDecimal coutReelTotal;
+    private BigDecimal coutTachesTotal;
+    private BigDecimal coutRessourcesTotal;
+    private BigDecimal coutGlobalTotal;
     private BigDecimal ecartPrevuReel;
     private BigDecimal resteBudget;
     private BigDecimal tauxConsommation;
     private boolean depasseBudget;
     private int nombreTaches;
+    private int nombreTachesTerminees;
+    private BigDecimal tauxAvancement;
 
     public RapportFinancierProjetDto() {
     }
@@ -28,11 +33,54 @@ public class RapportFinancierProjetDto {
         this.budgetProjet = budgetProjet;
         this.coutPrevuTotal = coutPrevuTotal;
         this.coutReelTotal = coutReelTotal;
+        this.coutTachesTotal = coutReelTotal;
+        this.coutRessourcesTotal = BigDecimal.ZERO;
+        this.coutGlobalTotal = coutReelTotal;
         this.ecartPrevuReel = ecartPrevuReel;
         this.resteBudget = resteBudget;
         this.tauxConsommation = tauxConsommation;
         this.depasseBudget = depasseBudget;
         this.nombreTaches = nombreTaches;
+        this.nombreTachesTerminees = 0;
+        this.tauxAvancement = BigDecimal.ZERO;
+    }
+
+    public RapportFinancierProjetDto(Long projetId, String nomProjet, String statutProjet,
+                                     BigDecimal budgetProjet, BigDecimal coutPrevuTotal, BigDecimal coutReelTotal,
+                                     BigDecimal coutTachesTotal, BigDecimal coutRessourcesTotal,
+                                     BigDecimal coutGlobalTotal, BigDecimal ecartPrevuReel,
+                                     BigDecimal resteBudget, BigDecimal tauxConsommation,
+                                     boolean depasseBudget, int nombreTaches) {
+        this.projetId = projetId;
+        this.nomProjet = nomProjet;
+        this.statutProjet = statutProjet;
+        this.budgetProjet = budgetProjet;
+        this.coutPrevuTotal = coutPrevuTotal;
+        this.coutReelTotal = coutReelTotal;
+        this.coutTachesTotal = coutTachesTotal;
+        this.coutRessourcesTotal = coutRessourcesTotal;
+        this.coutGlobalTotal = coutGlobalTotal;
+        this.ecartPrevuReel = ecartPrevuReel;
+        this.resteBudget = resteBudget;
+        this.tauxConsommation = tauxConsommation;
+        this.depasseBudget = depasseBudget;
+        this.nombreTaches = nombreTaches;
+        this.nombreTachesTerminees = 0;
+        this.tauxAvancement = BigDecimal.ZERO;
+    }
+
+    public RapportFinancierProjetDto(Long projetId, String nomProjet, String statutProjet,
+                                     BigDecimal budgetProjet, BigDecimal coutPrevuTotal, BigDecimal coutReelTotal,
+                                     BigDecimal coutTachesTotal, BigDecimal coutRessourcesTotal,
+                                     BigDecimal coutGlobalTotal, BigDecimal ecartPrevuReel,
+                                     BigDecimal resteBudget, BigDecimal tauxConsommation,
+                                     boolean depasseBudget, int nombreTaches, int nombreTachesTerminees,
+                                     BigDecimal tauxAvancement) {
+        this(projetId, nomProjet, statutProjet, budgetProjet, coutPrevuTotal, coutReelTotal,
+                coutTachesTotal, coutRessourcesTotal, coutGlobalTotal, ecartPrevuReel,
+                resteBudget, tauxConsommation, depasseBudget, nombreTaches);
+        this.nombreTachesTerminees = nombreTachesTerminees;
+        this.tauxAvancement = tauxAvancement;
     }
 
     public Long getProjetId() {
@@ -83,6 +131,30 @@ public class RapportFinancierProjetDto {
         this.coutReelTotal = coutReelTotal;
     }
 
+    public BigDecimal getCoutTachesTotal() {
+        return coutTachesTotal;
+    }
+
+    public void setCoutTachesTotal(BigDecimal coutTachesTotal) {
+        this.coutTachesTotal = coutTachesTotal;
+    }
+
+    public BigDecimal getCoutRessourcesTotal() {
+        return coutRessourcesTotal;
+    }
+
+    public void setCoutRessourcesTotal(BigDecimal coutRessourcesTotal) {
+        this.coutRessourcesTotal = coutRessourcesTotal;
+    }
+
+    public BigDecimal getCoutGlobalTotal() {
+        return coutGlobalTotal;
+    }
+
+    public void setCoutGlobalTotal(BigDecimal coutGlobalTotal) {
+        this.coutGlobalTotal = coutGlobalTotal;
+    }
+
     public BigDecimal getResteBudget() {
         return resteBudget;
     }
@@ -113,6 +185,22 @@ public class RapportFinancierProjetDto {
 
     public void setNombreTaches(int nombreTaches) {
         this.nombreTaches = nombreTaches;
+    }
+
+    public int getNombreTachesTerminees() {
+        return nombreTachesTerminees;
+    }
+
+    public void setNombreTachesTerminees(int nombreTachesTerminees) {
+        this.nombreTachesTerminees = nombreTachesTerminees;
+    }
+
+    public BigDecimal getTauxAvancement() {
+        return tauxAvancement;
+    }
+
+    public void setTauxAvancement(BigDecimal tauxAvancement) {
+        this.tauxAvancement = tauxAvancement;
     }
      public BigDecimal getEcartPrevuReel() {
         return ecartPrevuReel;

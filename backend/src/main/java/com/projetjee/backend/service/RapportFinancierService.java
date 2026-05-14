@@ -19,10 +19,13 @@ public class RapportFinancierService {
 
     private final ProjectRepository projectRepository;
     private final TaskRepository taskRepository;
+    private final ProjectRessourceService projectRessourceService;
 
-    public RapportFinancierService(ProjectRepository projectRepository, TaskRepository taskRepository) {
+    public RapportFinancierService(ProjectRepository projectRepository, TaskRepository taskRepository,
+            ProjectRessourceService projectRessourceService) {
         this.projectRepository = projectRepository;
         this.taskRepository = taskRepository;
+        this.projectRessourceService = projectRessourceService;
     }
 
     public List<RapportFinancierProjetDto> chargerTousLesRapportsFinanciers() {
@@ -55,30 +58,46 @@ public class RapportFinancierService {
                 .map(tache -> tache.getCoutPrevu() != null ? tache.getCoutPrevu() : BigDecimal.ZERO)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        BigDecimal ecartPrevuReel = coutPrevuTotal.subtract(coutReelTotal);     
-        BigDecimal resteBudget = budgetProjet.subtract(coutReelTotal);
+        BigDecimal coutRessourcesTotal = projectRessourceService.calculerCoutRessourcesProjet(projet.getId());
+        BigDecimal coutEstimeTotal = coutPrevuTotal.add(coutRessourcesTotal);
+        BigDecimal ecartPrevuReel = coutPrevuTotal.subtract(coutReelTotal);
+        BigDecimal resteBudget = budgetProjet.subtract(coutEstimeTotal);
 
         BigDecimal tauxConsommation = BigDecimal.ZERO;
         if (budgetProjet.compareTo(BigDecimal.ZERO) > 0) {
-            tauxConsommation = coutReelTotal
+            tauxConsommation = coutEstimeTotal
                     .multiply(new BigDecimal("100"))
                     .divide(budgetProjet, 2, RoundingMode.HALF_UP);
         }
 
-        boolean depasseBudget = coutReelTotal.compareTo(budgetProjet) > 0;
+        boolean depasseBudget = coutEstimeTotal.compareTo(budgetProjet) > 0;
+        int nombreTachesTerminees = (int) taches.stream()
+                .filter(tache -> tache.getStatut() != null && tache.getStatut().name().contains("Compl"))
+                .count();
+        BigDecimal tauxAvancement = BigDecimal.ZERO;
+        if (!taches.isEmpty()) {
+            tauxAvancement = BigDecimal.valueOf(nombreTachesTerminees)
+                    .multiply(new BigDecimal("100"))
+                    .divide(BigDecimal.valueOf(taches.size()), 2, RoundingMode.HALF_UP);
+        }
 
         return new RapportFinancierProjetDto(
                 projet.getId(),
                 projet.getNom(),
                 projet.getStatut().name(),
                 budgetProjet,
-                ecartPrevuReel,
                 coutPrevuTotal,
                 coutReelTotal,
+                coutReelTotal,
+                coutRessourcesTotal,
+                coutEstimeTotal,
+                ecartPrevuReel,
                 resteBudget,
                 tauxConsommation,
                 depasseBudget,
-                taches.size()
+                taches.size(),
+                nombreTachesTerminees,
+                tauxAvancement
         );
     }
 }

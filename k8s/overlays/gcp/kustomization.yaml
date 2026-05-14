@@ -1,0 +1,28 @@
+# Overlay GCP/GKE - adapte la base Kubernetes pour un cluster Google Kubernetes Engine.
+# Les images doivent etre publiees dans Artifact Registry avant application.
+# Commande d'application : kubectl apply -k k8s/overlays/gcp
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: gestiondeprojets
+
+resources:
+  - ../../base
+
+secretGenerator:
+  - name: gestiondeprojets-secrets
+    envs:
+      - .env
+    options:
+      disableNameSuffixHash: true
+
+images:
+  - name: gestiondeprojets-backend
+    newName: europe-west1-docker.pkg.dev/gestion-de-projets-496315/gestiondeprojets/backend
+    newTag: v2
+  - name: gestiondeprojets-frontend
+    newName: europe-west1-docker.pkg.dev/gestion-de-projets-496315/gestiondeprojets/frontend
+    newTag: v2
+
+patches:
+  - path: patches/expose-frontend-load-balancer.yaml

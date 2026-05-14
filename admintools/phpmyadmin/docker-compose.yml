@@ -4,11 +4,14 @@ services:
     container_name: gestionprojets-phpmyadmin
     restart: unless-stopped
     environment:
-      # Requires ./start-mysql-tunnel.sh to be running.
-      PMA_HOST: host.docker.internal
-      PMA_PORT: 3307
+      PMA_HOST: mysql
+      PMA_PORT: 3306
       UPLOAD_LIMIT: 512M
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     ports:
       - "127.0.0.1:8084:80"
+    networks:
+      - gestion-network
+
+networks:
+  gestion-network:
+    external: true

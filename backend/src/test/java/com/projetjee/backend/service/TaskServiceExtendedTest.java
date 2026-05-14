@@ -146,6 +146,7 @@ class TaskServiceExtendedTest {
     @DisplayName("Should create task successfully")
     void testCreerTache_Success() {
         when(projectRepository.findById(1L)).thenReturn(Optional.of(testProject));
+        when(employeeRepository.existsByNomAndRoleIgnoreCase("John Doe", "Chef de projet")).thenReturn(true);
         when(taskRepository.save(any(Task.class))).thenReturn(testTask);
 
         Task result = taskService.creerTache(testTask);
@@ -181,6 +182,7 @@ class TaskServiceExtendedTest {
         taskWithNullCosts.setCoutPrevu(null);
 
         when(projectRepository.findById(1L)).thenReturn(Optional.of(testProject));
+        when(employeeRepository.existsByNomAndRoleIgnoreCase("John", "Chef de projet")).thenReturn(true);
         when(taskRepository.save(any(Task.class))).thenReturn(taskWithNullCosts);
 
         Task result = taskService.creerTache(taskWithNullCosts);
@@ -195,6 +197,7 @@ class TaskServiceExtendedTest {
     void testMettreAJourTache_Success() {
         when(taskRepository.findById(1L)).thenReturn(Optional.of(testTask));
         when(projectRepository.findById(1L)).thenReturn(Optional.of(testProject));
+        when(employeeRepository.existsByNomAndRoleIgnoreCase("Jane Doe", "Chef de projet")).thenReturn(true);
         when(taskRepository.save(any(Task.class))).thenReturn(testTask);
 
         Task updateData = new Task();
