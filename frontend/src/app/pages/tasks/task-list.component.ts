@@ -1,8 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { TaskService } from '../../services/task.services';
 import { Task } from '../../models/task.models';
+import { ProjectService } from '../../services/project.services';
+import { Project } from '../../models/project.models';
 
 @Component({
   selector: 'app-task-list',
@@ -13,10 +15,19 @@ import { Task } from '../../models/task.models';
       <div class="page-header">
         <div>
           <h1>Tâches</h1>
-          <p>Suivi opérationnel des tâches du projet</p>
+          <p>{{ projet ? 'Tâches du projet ' + projet.nom : 'Suivi opérationnel des tâches du projet' }}</p>
         </div>
 
-        <a routerLink="/taches/nouveau" class="primary-button">Nouvelle tâche</a>
+        <div class="header-actions">
+          <a *ngIf="projet" routerLink="/projets" class="secondary-button">Retour aux projets</a>
+          <a
+            routerLink="/taches/nouveau"
+            [queryParams]="projet ? { projetId: projet.id } : null"
+            class="primary-button"
+          >
+            Nouvelle tâche
+          </a>
+        </div>
       </div>
 
       <div *ngIf="messageErreur" class="alert error">
@@ -164,6 +175,25 @@ import { Task } from '../../models/task.models';
         color: white;
       }
 
+      .secondary-button {
+        height: 44px;
+        padding: 0 18px;
+        border-radius: 12px;
+        text-decoration: none;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        background: #eff6ff;
+        color: #1d4ed8;
+        border: 1px solid #bfdbfe;
+      }
+
+      .header-actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
       .link-button,
       .danger-button {
         height: 38px;
@@ -212,13 +242,49 @@ import { Task } from '../../models/task.models';
 })
 export class TaskListComponent implements OnInit {
   readonly taskService = inject(TaskService);
+  private projectService = inject(ProjectService);
+  private route = inject(ActivatedRoute);
+
+  projet: Project | null = null;
   messageErreur = '';
 
   ngOnInit(): void {
+    const projetId = Number(this.route.snapshot.paramMap.get('id'));
+
+    if (!Number.isNaN(projetId) && projetId > 0) {
+      this.chargerProjet(projetId);
+      this.chargerTachesProjet(projetId);
+      return;
+    }
+
+    this.chargerToutesLesTaches();
+  }
+
+  private chargerToutesLesTaches(): void {
     this.taskService.chargerToutesLesTaches().subscribe({
       error: (error) => {
         this.messageErreur =
           `Impossible de charger les tâches. ${error?.status ?? ''} ${error?.statusText ?? ''}`.trim();
+      },
+    });
+  }
+
+  private chargerProjet(projetId: number): void {
+    this.projectService.recupererProjetParId(projetId).subscribe({
+      next: (projet) => {
+        this.projet = projet;
+      },
+      error: () => {
+        this.messageErreur = 'Impossible de charger le projet.';
+      },
+    });
+  }
+
+  private chargerTachesProjet(projetId: number): void {
+    this.taskService.chargerTachesParProjet(projetId).subscribe({
+      error: (error) => {
+        this.messageErreur =
+          `Impossible de charger les tâches du projet. ${error?.status ?? ''} ${error?.statusText ?? ''}`.trim();
       },
     });
   }
@@ -235,6 +301,11 @@ export class TaskListComponent implements OnInit {
 
     this.taskService.supprimerTache(tache.id).subscribe({
       next: () => {
+        if (this.projet?.id) {
+          this.taskService.chargerTachesParProjet(this.projet.id).subscribe();
+          return;
+        }
+
         this.taskService.chargerToutesLesTaches().subscribe();
       },
       error: (error) => {

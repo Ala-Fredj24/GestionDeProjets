@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # MySQL Database
   mysql:
@@ -42,8 +40,8 @@ services:
       SERVER_PORT: 8085
     ports:
       - "${BACKEND_PORT:-8085}:8085"
-    volumes:
-      - ./backend:/app
+   # volumes:
+    #  - ./backend:/app
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8085/actuator/health"]
       interval: 30s
@@ -113,5 +111,6 @@ volumes:
 
 networks:
   gestion-network:
+    name: gestion-network
     driver: bridge
  

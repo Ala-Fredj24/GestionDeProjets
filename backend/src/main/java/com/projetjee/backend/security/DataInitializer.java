@@ -11,12 +11,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.projetjee.backend.entity.Employee;
 import com.projetjee.backend.entity.Project;
+import com.projetjee.backend.entity.Ressource;
 import com.projetjee.backend.entity.Task;
 import com.projetjee.backend.enums.ProjectStatus;
 import com.projetjee.backend.enums.TaskPriority;
 import com.projetjee.backend.enums.TaskStatus;
 import com.projetjee.backend.repository.EmployeeRepository;
 import com.projetjee.backend.repository.ProjectRepository;
+import com.projetjee.backend.repository.RessourceRepository;
 import com.projetjee.backend.repository.TaskRepository;
 
 @Component
@@ -26,15 +28,17 @@ public class DataInitializer implements CommandLineRunner {
     private final EmployeeRepository employeeRepository;
     private final ProjectRepository projectRepository;
     private final TaskRepository taskRepository;
+    private final RessourceRepository ressourceRepository;
     private final PasswordEncoder passwordEncoder;
 
     public DataInitializer(UserRepository userRepository, EmployeeRepository employeeRepository,
             ProjectRepository projectRepository, TaskRepository taskRepository,
-            PasswordEncoder passwordEncoder) {
+            RessourceRepository ressourceRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.employeeRepository = employeeRepository;
         this.projectRepository = projectRepository;
         this.taskRepository = taskRepository;
+        this.ressourceRepository = ressourceRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -55,6 +59,11 @@ public class DataInitializer implements CommandLineRunner {
         ensureUser("ines@projet.com", "employe123", Role.EMPLOYE, ines);
         ensureUser("yassine@projet.com", "employe123", Role.EMPLOYE, yassine);
         ensureUser("nour@projet.com", "employe123", Role.EMPLOYE, nour);
+
+        ensureRessource("Serveur cloud", "Materielle", "500.00", true);
+        ensureRessource("Licences outils projet", "Logicielle", "1200.00", true);
+        ensureRessource("Budget formation equipe", "Financiere", "2500.00", true);
+        ensureRessource("Audit securite externe", "Financiere", "4000.00", true);
 
         LocalDate today = LocalDate.now();
 
@@ -150,6 +159,15 @@ public class DataInitializer implements CommandLineRunner {
         }
 
         return changed ? userRepository.save(user) : user;
+    }
+
+    private Ressource ensureRessource(String nom, String type, String cout, boolean disponibilite) {
+        return ressourceRepository.findAll().stream()
+                .filter(ressource -> nom.equals(ressource.getNom()))
+                .findFirst()
+                .orElseGet(() -> ressourceRepository.save(
+                        new Ressource(nom, type, new BigDecimal(cout), disponibilite)
+                ));
     }
 
     private Project ensureProject(String nom, LocalDate dateDebut, LocalDate dateFin, String budget,

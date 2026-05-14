@@ -22,6 +22,7 @@ import com.projetjee.backend.enums.TaskStatus;
 import com.projetjee.backend.enums.TaskPriority;
 import com.projetjee.backend.repository.TaskRepository;
 import com.projetjee.backend.repository.ProjectRepository;
+import com.projetjee.backend.repository.EmployeeRepository;
 
 @ExtendWith(MockitoExtension.class)
 class TaskServiceTest {
@@ -31,6 +32,9 @@ class TaskServiceTest {
 
     @Mock
     private ProjectRepository projectRepository;
+
+    @Mock
+    private EmployeeRepository employeeRepository;
 
     @InjectMocks
     private TaskService taskService;
@@ -81,6 +85,7 @@ class TaskServiceTest {
     @Test
     void testCreerTache_Success() {
         when(projectRepository.findById(1L)).thenReturn(Optional.of(testProject));
+        when(employeeRepository.existsByNomAndRoleIgnoreCase("John Doe", "Chef de projet")).thenReturn(true);
         when(taskRepository.save(any(Task.class))).thenReturn(testTask);
 
         Task result = taskService.creerTache(testTask);
@@ -94,6 +99,7 @@ class TaskServiceTest {
     void testMettreAJourTache_Success() {
         when(taskRepository.findById(1L)).thenReturn(Optional.of(testTask));
         when(projectRepository.findById(1L)).thenReturn(Optional.of(testProject));
+        when(employeeRepository.existsByNomAndRoleIgnoreCase("Jane Doe", "Chef de projet")).thenReturn(true);
         when(taskRepository.save(any(Task.class))).thenReturn(testTask);
 
         Task updateData = new Task();

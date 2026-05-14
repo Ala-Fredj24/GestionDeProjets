@@ -34,6 +34,9 @@ class RapportFinancierServiceTest {
     @Mock
     private TaskRepository taskRepository;
 
+    @Mock
+    private ProjectRessourceService projectRessourceService;
+
     @InjectMocks
     private RapportFinancierService rapportFinancierService;
 
@@ -54,6 +57,7 @@ class RapportFinancierServiceTest {
         List<Project> projects = List.of(testProject);
         when(projectRepository.findAll()).thenReturn(projects);
         when(taskRepository.findByProjetId(1L)).thenReturn(Collections.emptyList());
+        when(projectRessourceService.calculerCoutRessourcesProjet(1L)).thenReturn(BigDecimal.ZERO);
 
         List<RapportFinancierProjetDto> result = rapportFinancierService.chargerTousLesRapportsFinanciers();
 
@@ -79,6 +83,7 @@ class RapportFinancierServiceTest {
     void testChargerRapportFinancierParProjet_Success() {
         when(projectRepository.findById(1L)).thenReturn(Optional.of(testProject));
         when(taskRepository.findByProjetId(1L)).thenReturn(Collections.emptyList());
+        when(projectRessourceService.calculerCoutRessourcesProjet(1L)).thenReturn(BigDecimal.ZERO);
 
         RapportFinancierProjetDto result = rapportFinancierService.chargerRapportFinancierParProjet(1L);
 

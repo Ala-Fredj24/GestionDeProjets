@@ -38,6 +38,10 @@ import { Employee } from '../../models/employee.models';
         Aucun employé disponible. Crée d'abord un employé avant d'ajouter une tâche.
       </div>
 
+      <div *ngIf="employes.length > 0 && chefsProjet.length === 0 && !messageErreur" class="alert info">
+        Aucun chef de projet disponible. Le responsable doit être choisi parmi les employés dont le rôle est Chef de projet.
+      </div>
+
       <div class="form-card">
         <form [formGroup]="formulaire" (ngSubmit)="soumettre()">
           <div *ngIf="messageSucces" class="alert success">
@@ -64,14 +68,14 @@ import { Employee } from '../../models/employee.models';
 
             <div class="field">
               <label for="responsable">Responsable</label>
-              <input
-                id="responsable"
-                type="text"
-                formControlName="responsable"
-                placeholder="Ex: Ali"
-              />
+              <select id="responsable" formControlName="responsable">
+                <option value="">Sélectionner un chef de projet</option>
+                <option *ngFor="let employe of chefsProjet" [value]="employe.nom">
+                  {{ employe.nom }} — {{ employe.email }}
+                </option>
+              </select>
               <small *ngIf="f.responsable.touched && f.responsable.invalid">
-                Le responsable est obligatoire.
+                Le responsable doit être un employé avec le rôle Chef de projet.
               </small>
             </div>
 
@@ -128,19 +132,31 @@ import { Employee } from '../../models/employee.models';
           </div>
           <div class="field">
             <label for="coutReel">Coût réel</label>
-            <input id="coutReel" type="number" formControlName="coutReel" placeholder="Ex: 2500" />
+            <input
+              id="coutReel"
+              type="number"
+              formControlName="coutReel"
+              placeholder="Ex: 2500"
+              [readonly]="!statutCompleteSelectionne"
+            />
             <small *ngIf="f.coutReel.touched && f.coutReel.invalid">
               Le coût réel est obligatoire et doit être positif ou nul.
+            </small>
+            <small *ngIf="!statutCompleteSelectionne" class="hint">
+              Le coût réel est pris en compte quand la tâche est complétée.
             </small>
           </div>
           <div class="field">
             <label for="employeAssigneId">Employé assigné</label>
             <select id="employeAssigneId" formControlName="employeAssigneId">
               <option [ngValue]="null">Aucun employé assigné</option>
-              <option *ngFor="let employe of employes" [ngValue]="employe.id">
+              <option *ngFor="let employe of employesAssignables" [ngValue]="employe.id">
                 {{ employe.nom }} — {{ employe.role }}
               </option>
             </select>
+            <small *ngIf="projetSelectionne && employesAssignables.length === 0">
+              Aucun employe n'est encore affecte a ce projet.
+            </small>
           </div>
           <div class="actions">
             <button type="button" class="secondary-button" routerLink="/taches">Annuler</button>
@@ -148,7 +164,7 @@ import { Employee } from '../../models/employee.models';
             <button
               type="submit"
               class="primary-button"
-              [disabled]="enregistrementEnCours || projets.length === 0"
+              [disabled]="enregistrementEnCours || projets.length === 0 || chefsProjet.length === 0"
             >
               {{
                 enregistrementEnCours
@@ -246,6 +262,10 @@ import { Employee } from '../../models/employee.models';
       small {
         color: #dc2626;
         font-size: 13px;
+      }
+
+      .hint {
+        color: #64748b;
       }
 
       .actions {
@@ -367,6 +387,19 @@ export class TaskFormComponent implements OnInit {
     return this.employeeService.employes();
   }
 
+  get chefsProjet(): Employee[] {
+    return this.employes.filter((employe) => this.estChefProjet(employe));
+  }
+
+  get projetSelectionne(): Project | undefined {
+    const projetId = Number(this.formulaire.value.projetId);
+    return this.projets.find((projet) => projet.id === projetId);
+  }
+
+  get employesAssignables(): Employee[] {
+    return this.projetSelectionne?.employes?.length ? this.projetSelectionne.employes : [];
+  }
+
   ngOnInit(): void {
     const chargerEmployes = () => {
       if (this.employeeService.employes().length === 0) {
@@ -379,6 +412,7 @@ export class TaskFormComponent implements OnInit {
     };
 
     if (this.projectService.projets().length > 0) {
+      this.preselectionnerProjetDepuisUrl();
       this.chargerTacheSiNecessaire();
       chargerEmployes();
       return;
@@ -386,6 +420,7 @@ export class TaskFormComponent implements OnInit {
 
     this.projectService.chargerTousLesProjets().subscribe({
       next: () => {
+        this.preselectionnerProjetDepuisUrl();
         this.chargerTacheSiNecessaire();
         chargerEmployes();
       },
@@ -416,7 +451,7 @@ export class TaskFormComponent implements OnInit {
       statut: this.formulaire.value.statut as string,
       priorite: this.formulaire.value.priorite as string,
       dateLimite: this.formulaire.value.dateLimite as string,
-      coutReel: Number(this.formulaire.value.coutReel),
+      coutReel: this.statutCompleteSelectionne ? Number(this.formulaire.value.coutReel) : 0,
       coutPrevu: Number(this.formulaire.value.coutPrevu),
       employeAssigne: employeAssigneId ? { id: Number(employeAssigneId) } : null,
     };
@@ -438,7 +473,7 @@ export class TaskFormComponent implements OnInit {
         this.taskService.chargerToutesLesTaches().subscribe();
 
         setTimeout(() => {
-          this.router.navigateByUrl('/taches');
+          this.router.navigateByUrl(`/projets/${projetId}/taches`);
         }, 900);
       },
       error: (error) => {
@@ -475,6 +510,8 @@ export class TaskFormComponent implements OnInit {
           statut: tache.statut,
           priorite: tache.priorite,
           dateLimite: tache.dateLimite,
+          coutReel: Number(tache.coutReel ?? 0),
+          coutPrevu: Number(tache.coutPrevu ?? 0),
           employeAssigneId: tache.employeAssigne?.id ?? null,
         });
       },
@@ -485,5 +522,25 @@ export class TaskFormComponent implements OnInit {
           'Impossible de charger la tâche à modifier.';
       },
     });
+  }
+
+  private preselectionnerProjetDepuisUrl(): void {
+    const projetIdParam = this.route.snapshot.queryParamMap.get('projetId');
+    if (!projetIdParam || this.modeEdition) {
+      return;
+    }
+
+    const projetId = Number(projetIdParam);
+    if (!Number.isNaN(projetId)) {
+      this.formulaire.patchValue({ projetId });
+    }
+  }
+
+  private estChefProjet(employe: Employee): boolean {
+    return employe.role.trim().toLowerCase() === 'chef de projet';
+  }
+
+  get statutCompleteSelectionne(): boolean {
+    return (this.formulaire.value.statut || '').toLowerCase().includes('compl');
   }
 }

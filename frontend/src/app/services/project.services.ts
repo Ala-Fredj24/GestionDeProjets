@@ -1,7 +1,7 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
-import { Project, ProjectPayload } from '../models/project.models';
+import { Project, ProjectDetails, ProjectPayload } from '../models/project.models';
 import { environment } from '../../environments/environment';
 import { RapportFinancierProjet } from '../models/rapport-financier.models';
 
@@ -28,6 +28,10 @@ export class ProjectService {
 
   recupererProjetParId(id: number): Observable<Project> {
     return this.http.get<Project>(`${this.apiUrl}/${id}`);
+  }
+
+  recupererDetailsProjet(id: number): Observable<ProjectDetails> {
+    return this.http.get<ProjectDetails>(`${this.apiUrl}/${id}/details`);
   }
 
   creerProjet(payload: ProjectPayload): Observable<Project> {

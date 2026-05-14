@@ -17,8 +17,18 @@ export class TaskService {
     return this.http.get<Task[]>(this.apiUrl);
   }
 
+  recupererTachesParProjet(projetId: number): Observable<Task[]> {
+    return this.http.get<Task[]>(`${this.apiUrl}/projet/${projetId}`);
+  }
+
   chargerToutesLesTaches(): Observable<Task[]> {
     return this.http.get<Task[]>(this.apiUrl).pipe(tap((taches) => this.taches.set(taches)));
+  }
+
+  chargerTachesParProjet(projetId: number): Observable<Task[]> {
+    return this.http
+      .get<Task[]>(`${this.apiUrl}/projet/${projetId}`)
+      .pipe(tap((taches) => this.taches.set(taches)));
   }
 
   recupererTacheParId(id: number): Observable<Task> {
